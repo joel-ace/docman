@@ -2,7 +2,6 @@ import express from 'express';
 import Users from '../../controllers/users';
 import {
   isAuthenticated,
-  isAdmin,
   isUserOwn,
   isAdminOrUserOwn
 } from '../../helpers/utils';
@@ -10,7 +9,7 @@ import {
 const Router = express.Router();
 
 Router.route('/')
-  .get([isAuthenticated, isAdmin], Users.viewUser)
+  .get([isAuthenticated], Users.viewUser)
   .post(Users.createUser);
 
 Router.route('/:id')
