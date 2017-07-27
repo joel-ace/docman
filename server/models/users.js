@@ -1,21 +1,26 @@
 export default (sequelize, DataTypes) => {
   const Users = sequelize.define('Users', {
+    userId: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
     fullname: {
       allowNull: false,
       type: DataTypes.STRING,
     },
-    username: {
+    password: {
       allowNull: false,
       type: DataTypes.STRING,
-      unique: true,
     },
-    password: DataTypes.STRING,
     email: {
       allowNull: false,
       type: DataTypes.STRING,
       unique: true,
     },
     roleId: {
+      allowNull: false,
       type: DataTypes.INTEGER,
     }
   });

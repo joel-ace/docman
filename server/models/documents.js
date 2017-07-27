@@ -1,28 +1,28 @@
 export default (sequelize, DataTypes) => {
   const Documents = sequelize.define('Documents', {
+    documentId: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
     title: {
       allowNull: false,
-      required: true,
       type: DataTypes.STRING,
-      unique: true,
-    },
-    author: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
     },
     content: {
       type: DataTypes.TEXT,
       allowNull: false
     },
     access: {
-      type: DataTypes.INTEGER,
+      allowNull: false,
+      type: DataTypes.ENUM,
+      values: ['public', 'private']
     },
     userId: {
+      allowNull: false,
       type: DataTypes.INTEGER,
     },
-    roleId: {
-      type: DataTypes.INTEGER,
-    }
   });
 
   Documents.associate = (models) => {
@@ -30,10 +30,10 @@ export default (sequelize, DataTypes) => {
       foreignKey: 'userId',
       onDelete: 'CASCADE'
     });
-    Documents.belongsTo(models.Roles, {
-      foreignKey: 'roleId',
-      onDelete: 'CASCADE'
-    });
+    // Documents.belongsTo(models.Roles, {
+    //   foreignKey: 'roleId',
+    //   onDelete: 'CASCADE'
+    // });
   };
   return Documents;
 };
