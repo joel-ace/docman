@@ -30,10 +30,6 @@ export default (sequelize, DataTypes) => {
       foreignKey: 'userId',
       onDelete: 'CASCADE'
     });
-    // Documents.belongsTo(models.Roles, {
-    //   foreignKey: 'roleId',
-    //   onDelete: 'CASCADE'
-    // });
   };
   return Documents;
 };

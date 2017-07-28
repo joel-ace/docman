@@ -11,6 +11,8 @@ Router.route('/')
   .get([isAuthenticated], Documents.viewDocument);
 
 Router.route('/:id')
-  .get([isAuthenticated], Documents.getDocumentById);
+  .get([isAuthenticated], Documents.getDocumentById)
+  .put([isAuthenticated], Documents.updateDocument)
+  .delete([isAuthenticated], Documents.deleteDocument);
 
 export default Router;
