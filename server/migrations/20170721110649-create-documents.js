@@ -18,10 +18,6 @@ module.exports = {
       access: {
         allowNull: false,
         type: Sequelize.ENUM,
-        references: {
-          model: 'Roles',
-          key: 'roleId',
-        },
         values: ['public', 'private', 'role']
       },
       userId: {
