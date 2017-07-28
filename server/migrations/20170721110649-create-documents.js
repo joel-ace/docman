@@ -10,22 +10,22 @@ module.exports = {
       title: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
-        required: true
       },
       content: {
         type: Sequelize.TEXT,
         allowNull: false,
       },
       access: {
-        type: Sequelize.INTEGER,
-        defaultValue: 1,
+        allowNull: false,
+        type: Sequelize.ENUM,
         references: {
           model: 'Roles',
           key: 'roleId',
-        }
+        },
+        values: ['public', 'private', 'role']
       },
       userId: {
+        allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',

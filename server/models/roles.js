@@ -1,7 +1,16 @@
 export default (sequelize, DataTypes) => {
   const Roles = sequelize.define('Roles', {
-    name: DataTypes.STRING,
-    description: DataTypes.STRING
+    roleId: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
+    name: {
+      allowNull: false,
+      type: DataTypes.STRING,
+      unique: true
+    },
   });
 
   Roles.associate = (models) => {
