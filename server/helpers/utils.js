@@ -138,3 +138,14 @@ export const isSameRole = (req, res, next) => {
     message: 'We encountered an error. Please try again later',
   }));
 };
+
+export const returnValidationErrors = (req, res) => {
+  const errors = req.validationErrors();
+
+  if (errors) {
+    return res.status(400).send({
+      status: 'error',
+      errors
+    });
+  }
+};
