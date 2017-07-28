@@ -93,7 +93,7 @@ const viewUser = (req, res) => {
   Users.findAll({
     include: [{
       model: Roles,
-      required: true
+      required: true,
     }],
     offset,
     limit,

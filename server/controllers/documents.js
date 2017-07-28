@@ -1,4 +1,4 @@
-import { Users, Roles, Documents } from '../models';
+import { Users, Documents } from '../models';
 
 /**
  * @description creates a document
