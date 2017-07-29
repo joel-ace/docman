@@ -1,5 +1,11 @@
 import { Users, Roles, Documents } from '../models';
-import { passwordHash, authenticateUser } from '../helpers/utils';
+import {
+  passwordHash,
+  authenticateUser,
+  catchError,
+  returnValidationErrors,
+  isRegisteredUser,
+} from '../helpers/utils';
 
 /**
  * @description creates a user
@@ -15,51 +21,37 @@ const createUser = (req, res) => {
   req.checkBody('password', 'Password cannot be empty').notEmpty();
   req.checkBody('password', 'Password should be a minimum of 6 characters').notEmpty();
 
-  const errors = req.validationErrors();
+  returnValidationErrors(req, res);
 
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
-
-  Users.findOne({
-    where: { email: req.body.email }
-  }).then((user) => {
-    if (user) {
+  /** check if provided email already exists user database */
+  isRegisteredUser(req.body.email, 'email')
+    .then((registrationState) => {
+      if (registrationState === false) {
+        Users.create({
+          fullname: req.body.fullname,
+          password: passwordHash(req.body.password),
+          email: req.body.email,
+          roleId: 2,
+        })
+        .then(newUser => res.status(201).send({
+          status: 'ok',
+          userDetails: {
+            userId: newUser.userId,
+            fullname: newUser.fullname,
+            email: newUser.email,
+            roleId: newUser.roleId,
+            created: newUser.createdAt,
+          },
+          message: 'Account creation was successful',
+        }))
+        .catch(() => catchError(res));
+      }
       return res.status(400).send({
         status: 'error',
-        message: 'An account with this email address already exists'
+        message: 'an account with this email already exists',
       });
     }
-    Users.create({
-      fullname: req.body.fullname,
-      password: passwordHash(req.body.password),
-      email: req.body.email,
-      roleId: 2,
-    })
-    .then(
-      newUser => res.status(201).send({
-        status: 'ok',
-        userDetails: {
-          userId: newUser.userId,
-          fullname: newUser.fullname,
-          email: newUser.email,
-          roleId: newUser.roleId,
-          created: newUser.createdAt
-        },
-        message: 'Account creation was successful'
-      })
-    )
-  .catch(error => res.status(400)
-    .send({
-      status: 'error',
-      error,
-      message: 'We encountered an error. Please try again later',
-    })
   );
-  });
 };
 
 /**
@@ -70,20 +62,13 @@ const createUser = (req, res) => {
  * @returns {object} response object of all users
  */
 const viewUser = (req, res) => {
-  let offset,
-    limit;
+  /** set default values for offset and limit */
+  let offset = 0, limit = 20;
   if (req.query.limit || req.query.offset) {
     req.checkQuery('limit', 'Limit must be an integer').isInt();
     req.checkQuery('offset', 'Offset must be an integer').isInt();
 
-    const errors = req.validationErrors();
-
-    if (errors) {
-      return res.status(400).send({
-        status: 'error',
-        errors
-      });
-    }
+    returnValidationErrors(req, res);
 
     /** convert limit and offset to number in base 10 */
     limit = parseInt(req.query.limit, 10);
@@ -91,12 +76,16 @@ const viewUser = (req, res) => {
   }
 
   Users.findAll({
-    include: [{
-      model: Roles,
-      required: true,
-    }],
+    include: [
+      {
+        model: Roles,
+        required: true,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      }
+    ],
     offset,
     limit,
+    attributes: { exclude: ['password', 'updatedAt', 'roleId'] },
   })
   .then((users) => {
     if (users.length < 1) {
@@ -106,31 +95,12 @@ const viewUser = (req, res) => {
       });
     }
 
-    const userObject = users.map(user => (
-      {
-        userId: user.userId,
-        fullname: user.fullname,
-        email: user.email,
-        role: {
-          roleId: user.roleId,
-          roleName: user.Role.name,
-        },
-        createdAt: user.createdAt,
-      })
-    );
-
     return res.status(200).send({
       status: 'ok',
-      users: userObject,
+      users,
     });
   })
-  .catch(error => res.status(400)
-    .send({
-      status: 'error',
-      error,
-      message: 'We encountered an error. Please try again later',
-    })
-  );
+  .catch(() => catchError(res));
 };
 
 /**
@@ -144,24 +114,24 @@ const getUserById = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
 
-  const errors = req.validationErrors();
-
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
+  returnValidationErrors(req, res);
 
   Users.findOne({
     where: { userId: req.params.id },
-    attributes: { exclude: ['password'] }
+    include: [
+      {
+        model: Roles,
+        required: true,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      }
+    ],
+    attributes: { exclude: ['password', 'roleId'] },
   })
   .then((user) => {
     if (!user) {
       return res.status(404).send({
         status: 'error',
-        message: 'This user does not exist or has been previously deleted'
+        message: 'This user does not exist or has been previously deleted',
       });
     }
 
@@ -170,13 +140,7 @@ const getUserById = (req, res) => {
       userDetails: user,
     });
   })
-  .catch(error => res.status(400)
-    .send({
-      status: 'error',
-      error,
-      message: 'We encountered an error. Please try again later',
-    })
-  );
+  .catch(() => catchError(res));
 };
 
 /**
@@ -190,14 +154,7 @@ const updateUser = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
 
-  const errors = req.validationErrors();
-
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
+  returnValidationErrors(req, res);
 
   Users.findOne({
     where: { userId: req.params.id },
@@ -206,7 +163,7 @@ const updateUser = (req, res) => {
     if (!user) {
       res.status(404).send({
         status: 'error',
-        message: 'This user does not exist or has been previously deleted'
+        message: 'this user does not exist or has been previously deleted',
       });
     }
 
@@ -214,7 +171,7 @@ const updateUser = (req, res) => {
       fullname: req.body.fullname || user.email,
       email: req.body.email || user.email,
       password: passwordHash(req.body.password) || user.password,
-      roleId: user.roleId
+      roleId: user.roleId,
     })
     .then(updatedUser => res.status(200).send({
       status: 'ok',
@@ -225,15 +182,9 @@ const updateUser = (req, res) => {
         roleId: updatedUser.roleId,
       },
     }))
-    .catch(() => res.status(400).send({
-      status: 'error',
-      message: 'We encountered an error updating your details. Please try again later',
-    }));
+    .catch(() => catchError(res));
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 /**
@@ -247,14 +198,7 @@ const deleteUser = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
 
-  const errors = req.validationErrors();
-
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
+  returnValidationErrors(req, res);
 
   Users.findOne({
     where: { userId: req.params.id },
@@ -263,24 +207,18 @@ const deleteUser = (req, res) => {
     if (!user) {
       res.status(404).send({
         status: 'error',
-        message: 'This user does not exist or has been previously deleted'
+        message: 'This user does not exist or has been previously deleted',
       });
     }
 
     user.destroy()
     .then(() => res.status(200).json({
       status: 'ok',
-      message: 'User was successfully deleted'
+      message: 'User was successfully deleted',
     }))
-    .catch(() => res.status(400).send({
-      status: 'error',
-      message: 'We encountered an error deleting user. Please try again later',
-    }));
+    .catch(() => catchError(res));
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 /**
@@ -295,23 +233,16 @@ const loginUser = (req, res) => {
   req.checkBody('email', 'Enter a valid email address').isEmail();
   req.checkBody('password', 'Password cannot be empty').notEmpty();
 
-  const errors = req.validationErrors();
-
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
+  returnValidationErrors(req, res);
 
   Users.findOne({
-    where: { email: req.body.email }
+    where: { email: req.body.email },
   })
   .then((user) => {
     if (!user) {
       return res.status(404).send({
         status: 'error',
-        message: 'This email is not associated with any account'
+        message: 'This email is not associated with any account',
       });
     }
 
@@ -326,13 +257,10 @@ const loginUser = (req, res) => {
     }
     return res.status(400).send({
       status: 400,
-      message: 'Authentication failed. Password is incorrect'
+      message: 'Authentication failed. Password is incorrect',
     });
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 /**
@@ -346,14 +274,7 @@ const getUserDocuments = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
 
-  const errors = req.validationErrors();
-
-  if (errors) {
-    return res.status(400).send({
-      status: 'error',
-      errors
-    });
-  }
+  returnValidationErrors(req, res);
 
   Users.findOne({
     where: { userId: req.params.id },
@@ -362,7 +283,7 @@ const getUserDocuments = (req, res) => {
     if (!user) {
       return res.status(404).send({
         status: 'error',
-        message: 'This user does not exist or has been previously deleted'
+        message: 'This user does not exist or has been previously deleted',
       });
     }
 
@@ -370,29 +291,23 @@ const getUserDocuments = (req, res) => {
       where: {
         userId: req.params.id,
       },
-      attributes: { exclude: ['content', 'userId'] }
+      attributes: { exclude: ['content', 'userId'] },
     })
     .then((documents) => {
       if (documents.length === 0) {
         return res.status(404).send({
           status: 'ok',
-          message: 'No document associated with this user'
+          message: 'No document associated with this user',
         });
       }
       return res.status(200).send({
         status: 'ok',
-        documents
+        documents,
       });
     })
-    .catch(() => res.status(400).send({
-      status: 'error',
-      message: 'We encountered an error. Please try again later',
-    }));
+    .catch(() => catchError(res));
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 
@@ -403,5 +318,5 @@ export default {
   updateUser,
   deleteUser,
   loginUser,
-  getUserDocuments
+  getUserDocuments,
 };
