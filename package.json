@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run dev:db:migrate && node node_modules/gulp/bin/gulp",
-    "dev:db:migrate": "NODE_ENV=development sequelize db:migrate:undo:all && NODE_ENV=development sequelize db:migrate && NODE_ENV=development sequelize db:seed:all"
+    "dev:db:migrate": "NODE_ENV=development sequelize db:migrate:undo:all && NODE_ENV=development sequelize db:migrate && NODE_ENV=development sequelize db:seed:all",
+    "test:db:migrate": "NODE_ENV=test sequelize db:migrate:undo:all && NODE_ENV=test sequelize db:migrate",
+    "start:test:db": "npm run test:db:migrate",
+    "server-test": "npm run start:test:db && NODE_ENV=test nyc --reporter=html --reporter=text mocha --compilers js:babel-core/register server/tests/**/*.js --timeout 90000"
   },
   "repository": {
     "type": "git",
@@ -23,8 +26,11 @@
   },
   "homepage": "https://github.com/joel-ace/docman#readme",
   "dependencies": {
+    "babel-plugin-istanbul": "^4.1.4",
     "bcrypt": "^1.0.2",
     "body-parser": "^1.17.2",
+    "chai": "^4.1.0",
+    "chai-http": "^3.0.0",
     "dotenv": "^4.0.0",
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.2",
@@ -33,9 +39,18 @@
     "express-validator": "^3.2.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
+    "gulp-coveralls": "^0.1.4",
+    "gulp-exit": "0.0.2",
+    "gulp-inject-modules": "^1.0.0",
+    "gulp-istanbul": "^1.1.2",
+    "gulp-mocha": "^4.3.1",
     "gulp-nodemon": "^2.2.1",
+    "gulp-util": "^3.0.8",
+    "istanbul": "^0.4.5",
     "jsonwebtoken": "^7.4.1",
+    "mocha": "^3.4.2",
     "morgan": "^1.8.2",
+    "nyc": "^11.1.0",
     "pg": "^6.4.0",
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.4.0"

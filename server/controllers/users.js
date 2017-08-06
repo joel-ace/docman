@@ -32,25 +32,24 @@ const createUser = (req, res) => {
       });
     }
     if (!registrationState) {
-      Users.create({
+      return Users.create({
         fullname: req.body.fullname,
         password: passwordHash(req.body.password),
         email: req.body.email,
         roleId: 2,
-      })
-      .then(newUser => res.status(201).send({
-        userDetails: {
-          userId: newUser.userId,
-          fullname: newUser.fullname,
-          email: newUser.email,
-          roleId: newUser.roleId,
-          created: newUser.createdAt,
-        },
-        message: 'Account creation was successful',
-      }))
-      .catch(() => catchError(res));
+      });
     }
   })
+  .then(newUser => res.status(201).send({
+    userDetails: {
+      userId: newUser.userId,
+      fullname: newUser.fullname,
+      email: newUser.email,
+      roleId: newUser.roleId,
+      created: newUser.createdAt,
+    },
+    message: 'Account creation was successful',
+  }))
   .catch(() => catchError(res));
 };
 
@@ -236,12 +235,11 @@ const deleteUser = (req, res) => {
       });
     }
 
-    user.destroy()
-    .then(() => res.status(200).json({
-      message: 'User was successfully deleted',
-    }))
-    .catch(() => catchError(res));
+    return user.destroy();
   })
+  .then(() => res.status(200).json({
+    message: 'User was successfully deleted',
+  }))
   .catch(() => catchError(res));
 };
 
