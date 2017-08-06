@@ -31,7 +31,6 @@ export default (sequelize, DataTypes) => {
     });
     Users.belongsTo(models.Roles, {
       foreignKey: 'roleId',
-      onDelete: 'CASCADE',
     });
   };
   return Users;

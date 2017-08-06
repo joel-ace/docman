@@ -5,6 +5,7 @@ import {
   catchError,
   returnValidationErrors,
   isRegisteredUser,
+  pagination,
 } from '../helpers/utils';
 
 /**
@@ -19,39 +20,77 @@ const createUser = (req, res) => {
   req.checkBody('email', 'Email cannot be empty').notEmpty();
   req.checkBody('email', 'Enter a valid email address').isEmail();
   req.checkBody('password', 'Password cannot be empty').notEmpty();
-  req.checkBody('password', 'Password should be a minimum of 6 characters').notEmpty();
 
   returnValidationErrors(req, res);
 
-  /** check if provided email already exists user database */
+  /** check if provided email already exists in user database */
   isRegisteredUser(req.body.email, 'email')
-    .then((registrationState) => {
-      if (registrationState === false) {
-        Users.create({
-          fullname: req.body.fullname,
-          password: passwordHash(req.body.password),
-          email: req.body.email,
-          roleId: 2,
-        })
-        .then(newUser => res.status(201).send({
-          status: 'ok',
-          userDetails: {
-            userId: newUser.userId,
-            fullname: newUser.fullname,
-            email: newUser.email,
-            roleId: newUser.roleId,
-            created: newUser.createdAt,
-          },
-          message: 'Account creation was successful',
-        }))
-        .catch(() => catchError(res));
-      }
+  .then((registrationState) => {
+    if (registrationState) {
       return res.status(400).send({
-        status: 'error',
         message: 'an account with this email already exists',
       });
     }
-  );
+    if (!registrationState) {
+      Users.create({
+        fullname: req.body.fullname,
+        password: passwordHash(req.body.password),
+        email: req.body.email,
+        roleId: 2,
+      })
+      .then(newUser => res.status(201).send({
+        userDetails: {
+          userId: newUser.userId,
+          fullname: newUser.fullname,
+          email: newUser.email,
+          roleId: newUser.roleId,
+          created: newUser.createdAt,
+        },
+        message: 'Account creation was successful',
+      }))
+      .catch(() => catchError(res));
+    }
+  })
+  .catch(() => catchError(res));
+};
+
+/**
+ * @description authenticates user and generates token
+ * @function loginUser
+ * @param {object} req request object
+ * @param {object} res response object
+ * @returns {object} response object containing access token
+ */
+const loginUser = (req, res) => {
+  req.checkBody('email', 'Email cannot be empty').notEmpty();
+  req.checkBody('email', 'Enter a valid email address').isEmail();
+  req.checkBody('password', 'Password cannot be empty').notEmpty();
+
+  returnValidationErrors(req, res);
+
+  Users.findOne({
+    where: { email: req.body.email },
+  })
+  .then((user) => {
+    if (!user) {
+      return res.status(404).send({
+        message: 'This email is not associated with any account',
+      });
+    }
+
+    const token = authenticateUser(req.body.password, user);
+
+    if (token) {
+      return res.status(200).send({
+        accessToken: token,
+        message: 'Login was successful!',
+      });
+    }
+    return res.status(400).send({
+      message: 'Authentication failed. Password is incorrect',
+    });
+  })
+  .catch(() => catchError(res));
 };
 
 /**
@@ -75,7 +114,7 @@ const viewUser = (req, res) => {
     offset = parseInt(req.query.offset, 10);
   }
 
-  Users.findAll({
+  Users.findAndCount({
     include: [
       {
         model: Roles,
@@ -87,19 +126,10 @@ const viewUser = (req, res) => {
     limit,
     attributes: { exclude: ['password', 'updatedAt', 'roleId'] },
   })
-  .then((users) => {
-    if (users.length < 1) {
-      return res.status(200).send({
-        status: 'ok',
-        message: 'No user found',
-      });
-    }
-
-    return res.status(200).send({
-      status: 'ok',
-      users,
-    });
-  })
+  .then(users => res.status(200).send({
+    pagination: pagination(limit, offset, users.count),
+    users: users.rows,
+  }))
   .catch(() => catchError(res));
 };
 
@@ -158,32 +188,28 @@ const updateUser = (req, res) => {
 
   Users.findOne({
     where: { userId: req.params.id },
+    plain: true
   })
   .then((user) => {
-    if (!user) {
-      res.status(404).send({
-        status: 'error',
-        message: 'this user does not exist or has been previously deleted',
-      });
-    }
+    user.get({ plain: true });
 
-    user.update({
-      fullname: req.body.fullname || user.email,
+    const password = req.body.password ? passwordHash(req.body.password) : user.password;
+
+    return user.update({
+      password,
+      fullname: req.body.fullname || user.fullname,
       email: req.body.email || user.email,
-      password: passwordHash(req.body.password) || user.password,
       roleId: user.roleId,
-    })
-    .then(updatedUser => res.status(200).send({
-      status: 'ok',
-      userDetails: {
-        userId: updatedUser.userId,
-        fullname: updatedUser.fullname,
-        email: updatedUser.email,
-        roleId: updatedUser.roleId,
-      },
-    }))
-    .catch(() => catchError(res));
+    });
   })
+  .then(updatedUser => res.status(200).send({
+    userDetails: {
+      userId: updatedUser.userId,
+      fullname: updatedUser.fullname,
+      email: updatedUser.email,
+      roleId: updatedUser.roleId,
+    },
+  }))
   .catch(() => catchError(res));
 };
 
@@ -206,59 +232,15 @@ const deleteUser = (req, res) => {
   .then((user) => {
     if (!user) {
       res.status(404).send({
-        status: 'error',
         message: 'This user does not exist or has been previously deleted',
       });
     }
 
     user.destroy()
     .then(() => res.status(200).json({
-      status: 'ok',
       message: 'User was successfully deleted',
     }))
     .catch(() => catchError(res));
-  })
-  .catch(() => catchError(res));
-};
-
-/**
- * @description authenticates user and generates token
- * @function loginUser
- * @param {object} req request object
- * @param {object} res response object
- * @returns {object} response object containing access token
- */
-const loginUser = (req, res) => {
-  req.checkBody('email', 'Email cannot be empty').notEmpty();
-  req.checkBody('email', 'Enter a valid email address').isEmail();
-  req.checkBody('password', 'Password cannot be empty').notEmpty();
-
-  returnValidationErrors(req, res);
-
-  Users.findOne({
-    where: { email: req.body.email },
-  })
-  .then((user) => {
-    if (!user) {
-      return res.status(404).send({
-        status: 'error',
-        message: 'This email is not associated with any account',
-      });
-    }
-
-    const token = authenticateUser(req.body.password, user);
-
-    if (token) {
-      return res.status(200).send({
-        status: 'ok',
-        accessToken: token,
-        message: 'Login was successful!',
-      });
-    }
-    return res.status(400).send({
-      status: 400,
-      message: 'Authentication failed. Password is incorrect',
-    });
   })
   .catch(() => catchError(res));
 };
@@ -275,41 +257,35 @@ const getUserDocuments = (req, res) => {
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
 
   returnValidationErrors(req, res);
-
   Users.findOne({
     where: { userId: req.params.id },
   })
   .then((user) => {
     if (!user) {
       return res.status(404).send({
-        status: 'error',
         message: 'This user does not exist or has been previously deleted',
       });
     }
 
-    Documents.findAll({
+    return Documents.findAll({
       where: {
         userId: req.params.id,
       },
       attributes: { exclude: ['content', 'userId'] },
-    })
-    .then((documents) => {
-      if (documents.length === 0) {
-        return res.status(404).send({
-          status: 'ok',
-          message: 'No document associated with this user',
-        });
-      }
-      return res.status(200).send({
-        status: 'ok',
-        documents,
+    });
+  })
+  .then((documents) => {
+    if (documents.length === 0) {
+      return res.status(404).send({
+        message: 'No document associated with this user',
       });
-    })
-    .catch(() => catchError(res));
+    }
+    return res.status(200).send({
+      documents,
+    });
   })
   .catch(() => catchError(res));
 };
-
 
 export default {
   createUser,

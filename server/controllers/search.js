@@ -11,16 +11,15 @@ import { returnValidationErrors, catchError } from '../helpers/utils';
 const searchUser = (req, res) => {
   req.checkQuery('q', 'an email or name is required').notEmpty();
   returnValidationErrors(req, res);
-  const queryString = (req.query.q).toString();
 
   Users.findAll({
     where: {
       $or: [
         {
-          email: { $iLike: `%${queryString}%` }
+          email: { $iLike: `%${req.query.q}%` }
         },
         {
-          fullname: { $iLike: `%${queryString}%` }
+          fullname: { $iLike: `%${req.query.q}%` }
         }
       ]
     },
@@ -35,12 +34,10 @@ const searchUser = (req, res) => {
   .then((users) => {
     if (users.length === 0) {
       return res.status(200).send({
-        status: 'ok',
         message: 'no user found for your query',
       });
     }
     return res.status(200).send({
-      status: 'ok',
       users,
     });
   })
@@ -58,12 +55,11 @@ const searchDocument = (req, res) => {
   req.checkQuery('q', 'a document title is required').notEmpty();
 
   returnValidationErrors(req, res);
-  const queryString = (req.query.q).toString();
 
   Documents.findAll({
     where: {
       title: {
-        $iLike: `%${queryString}%`,
+        $iLike: `%${req.query.q}%`,
       }
     },
     include: [
@@ -77,12 +73,10 @@ const searchDocument = (req, res) => {
   .then((docs) => {
     if (docs.length === 0) {
       return res.status(200).send({
-        status: 'ok',
         message: 'No documents found for your query',
       });
     }
     return res.status(200).send({
-      status: 'ok',
       documents: docs,
     });
   })

@@ -4,8 +4,8 @@
   "description": "Docman is a Document Management System API",
   "main": "index.js",
   "scripts": {
-    "start": "node node_modules/gulp/bin/gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run dev:db:migrate && node node_modules/gulp/bin/gulp",
+    "dev:db:migrate": "NODE_ENV=development sequelize db:migrate:undo:all && NODE_ENV=development sequelize db:migrate && NODE_ENV=development sequelize db:seed:all"
   },
   "repository": {
     "type": "git",

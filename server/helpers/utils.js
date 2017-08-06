@@ -26,7 +26,7 @@ export const isRegisteredUser = (userIdentifier, type = 'id') => {
   .then((returnedUser) => {
     const user = returnedUser.get({ plain: true });
     if (user) {
-      return true;
+      return user;
     }
     return false;
   })
@@ -65,7 +65,6 @@ export const returnValidationErrors = (req, res) => {
 
   if (errors) {
     return res.status(400).send({
-      status: 'error',
       errors,
     });
   }
@@ -78,7 +77,6 @@ export const returnValidationErrors = (req, res) => {
  * @returns {object} response containing error message
  */
 export const catchError = res => res.status(503).send({
-  status: 'error',
   message: 'We encountered an error. Please try again later',
 });
 
@@ -97,7 +95,6 @@ export const isAuthenticated = (req, res, next) => {
     jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
       if (error) {
         res.status(401).send({
-          status: 'error',
           message: 'You are not authorized to access this resource',
         });
       } else {
@@ -106,11 +103,9 @@ export const isAuthenticated = (req, res, next) => {
           .then((registrationState) => {
             if (registrationState) {
               req.decoded = decoded;
-              next();
-              return;
+              return next();
             }
             return res.status(400).send({
-              status: 'error',
               message: 'user making this request cannot be authenticated',
             });
           }
@@ -119,7 +114,6 @@ export const isAuthenticated = (req, res, next) => {
     });
   } else {
     res.status(400).send({
-      status: 'error',
       message: 'Invalid request. You need a valid token to be authenticated',
     });
   }
@@ -135,13 +129,11 @@ export const isAuthenticated = (req, res, next) => {
  */
 export const isAdmin = (req, res, next) => {
   if (req.decoded.role === 1) {
-    next();
-  } else {
-    res.status(401).send({
-      status: 'error',
-      message: 'Only admins are authorized to access this resource',
-    });
+    return next();
   }
+  res.status(401).send({
+    message: 'Only admins are authorized to access this resource',
+  });
 };
 
 /**
@@ -157,7 +149,6 @@ export const isUserOwn = (req, res, next) => {
     next();
   } else {
     res.status(401).send({
-      status: 'error',
       message: 'Only the owner can access this resource',
     });
   }
@@ -176,8 +167,46 @@ export const isAdminOrUserOwn = (req, res, next) => {
     next();
   } else {
     res.status(401).send({
-      status: 'error',
       message: 'Only the owner or an admin can access this resource',
     });
   }
+};
+
+/**
+ * @description checks if user can access a document
+ * @function isAllowedDocumentAccess
+ * @param {object} document document object
+ * @param {object} req request object
+ * @returns {boolean} true if user has access, false if not
+ */
+export const isAllowedDocumentAccess = (document, req) => {
+  if (
+    document.access === 'public' ||
+    req.decoded.role === 1 ||
+    document.User.userId === req.decoded.userId ||
+    (document.access === 'role' && document.User.roleId === req.decoded.role)
+  ) {
+    return true;
+  }
+  return false;
+};
+
+/**
+ * @description creates a pagination object
+ * @function pagination
+ * @param {object} limit the query limit
+ * @param {object} offset offset
+ * @param {object} count query count
+ * @returns {object} pagination object
+ */
+export const pagination = (limit, offset, count) => {
+  const page = Math.floor(offset / limit) + 1;
+  const pageCount = Math.ceil(count / limit);
+  const pageSize = (count - offset) > limit ? limit : (count - offset);
+  return {
+    page,
+    pageCount,
+    pageSize,
+    totalCount: count,
+  };
 };

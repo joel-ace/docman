@@ -2,6 +2,8 @@ import { Users, Documents } from '../models';
 import {
   catchError,
   returnValidationErrors,
+  isAllowedDocumentAccess,
+  pagination,
 } from '../helpers/utils';
 
 
@@ -30,7 +32,6 @@ const createDocument = (req, res) => {
   })
   .then(
     document => res.status(201).send({
-      status: 'ok',
       document,
       message: 'document was successfully created',
     })
@@ -58,7 +59,7 @@ const viewDocument = (req, res) => {
     offset = parseInt(req.query.offset, 10);
   }
 
-  Documents.findAll({
+  Documents.findAndCount({
     include: [
       {
         model: Users,
@@ -71,16 +72,15 @@ const viewDocument = (req, res) => {
     attributes: { exclude: ['content', 'userId'] },
   })
   .then((documents) => {
-    if (documents.length < 1) {
+    if (documents.rows.length < 1) {
       return res.status(200).send({
-        status: 'ok',
         message: 'No document found',
       });
     }
 
     return res.status(200).send({
-      status: 'ok',
-      documents,
+      pagination: pagination(limit, offset, documents.count),
+      users: documents.rows,
     });
   })
   .catch(() => catchError(res));
@@ -114,25 +114,17 @@ const getDocumentById = (req, res) => {
   .then((document) => {
     if (!document) {
       return res.status(404).send({
-        status: 'error',
         message: 'This document does not exist or has been previously deleted',
       });
     }
 
-    if (
-      document.access === 'public' ||
-      req.decoded.role === 1 ||
-      document.User.userId === req.decoded.userId ||
-      (document.access === 'role' && document.User.roleId === req.decoded.role)
-    ) {
+    if (isAllowedDocumentAccess(document, req)) {
       return res.status(200).send({
-        status: 'ok',
         document,
       });
     }
 
     return res.status(401).send({
-      status: 'error',
       message: 'You are not authorized to view this document',
     });
   })
@@ -158,30 +150,24 @@ const updateDocument = (req, res) => {
   .then((document) => {
     if (!document) {
       return res.status(404).send({
-        status: 'error',
         message: 'This document does not exist or has been previously deleted',
       });
     }
-
     /** allow updating if the decoded userId is same with the userId on the document */
     if (req.decoded.userId === document.userId) {
-      document.update({
+      return document.update({
         title: req.body.title || document.title,
         content: req.body.content || document.content,
         access: req.body.access || document.access,
-      })
-      .then(updatedDocument => res.status(200).send({
-        status: 'ok',
-        document: updatedDocument,
-      }))
-      .catch(() => catchError(res));
-    } else {
-      return res.status(401).send({
-        status: 'error',
-        message: 'Only the document owner can update a document',
       });
     }
+    return res.status(401).send({
+      message: 'Only the document owner can update a document',
+    });
   })
+  .then(updatedDocument => res.status(200).send({
+    document: updatedDocument,
+  }))
   .catch(() => catchError(res));
 };
 
@@ -204,29 +190,23 @@ const deleteDocument = (req, res) => {
   .then((document) => {
     if (!document) {
       return res.status(404).send({
-        status: 'error',
         message: 'This document does not exist or has been previously deleted',
       });
     }
 
-    /** allow deleting if the its the user is the document owner on the admin */
+    /** allow deleting if the user is the document owner or the admin */
     if (req.decoded.userId === document.userId || req.decoded.role === 1) {
-      document.destroy()
-      .then(() => res.status(200).send({
-        status: 'ok',
-        message: 'Document successfully deleted',
-      }))
-      .catch(() => catchError(res));
-    } else {
-      return res.status(401).send({
-        status: 'error',
-        message: 'Only the document owner or admin can delete a document',
-      });
+      return document.destroy();
     }
+    return res.status(401).send({
+      message: 'Only the document owner or admin can delete a document',
+    });
   })
+  .then(() => res.status(200).send({
+    message: 'Document successfully deleted',
+  }))
   .catch(() => catchError(res));
 };
-
 
 export default {
   createDocument,
