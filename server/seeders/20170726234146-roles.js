@@ -11,5 +11,5 @@ module.exports = {
       updatedAt: new Date(),
     }], {}),
 
-  down: queryInterface => queryInterface.bulkDelete('Users', null, {})
+  down: queryInterface => queryInterface.bulkDelete('Roles', null, {})
 };

@@ -17,7 +17,7 @@ export default (sequelize, DataTypes) => {
     access: {
       allowNull: false,
       type: DataTypes.ENUM,
-      values: ['public', 'private']
+      values: ['public', 'private', 'role']
     },
     userId: {
       allowNull: false,
@@ -28,7 +28,6 @@ export default (sequelize, DataTypes) => {
   Documents.associate = (models) => {
     Documents.belongsTo(models.Users, {
       foreignKey: 'userId',
-      onDelete: 'CASCADE'
     });
   };
   return Documents;

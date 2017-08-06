@@ -1,5 +1,5 @@
 import { Users, Roles, Documents } from '../models';
-import { returnValidationErrors } from '../helpers/utils';
+import { returnValidationErrors, catchError } from '../helpers/utils';
 
 /**
  * @description searches for a user
@@ -12,41 +12,36 @@ const searchUser = (req, res) => {
   req.checkQuery('q', 'an email or name is required').notEmpty();
   returnValidationErrors(req, res);
 
-  const queryString = (req.query.q).toString();
   Users.findAll({
     where: {
-      $or: [{ email: {
-        $iLike: `%${queryString}%`
-      }
-      },
-      { fullname: {
-        $iLike: `%${queryString}%`
-      }
-      }]
+      $or: [
+        {
+          email: { $iLike: `%${req.query.q}%` }
+        },
+        {
+          fullname: { $iLike: `%${req.query.q}%` }
+        }
+      ]
     },
-    include: [{
-      model: Roles,
-      required: true,
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
-    }],
+    include: [
+      {
+        model: Roles,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      }
+    ],
     attributes: { exclude: ['password', 'updatedAt'] },
   })
   .then((users) => {
     if (users.length === 0) {
       return res.status(200).send({
-        status: 'ok',
-        message: 'no result found for your query',
+        message: 'no user found for your query',
       });
     }
     return res.status(200).send({
-      status: 'ok',
       users,
     });
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 /**
@@ -60,34 +55,32 @@ const searchDocument = (req, res) => {
   req.checkQuery('q', 'a document title is required').notEmpty();
 
   returnValidationErrors(req, res);
-  const queryString = (req.query.q).toString();
 
   Documents.findAll({
     where: {
       title: {
-        $iLike: `%${queryString}%`
+        $iLike: `%${req.query.q}%`,
       }
     },
-    include: [{
-      model: Users,
-      required: true,
-      attributes: ['fullname', 'userId'],
-    }],
-    attributes: { exclude: ['content'] }
+    include: [
+      {
+        model: Users,
+        attributes: ['fullname', 'userId'],
+      }
+    ],
+    attributes: { exclude: ['content'] },
   })
   .then((docs) => {
     if (docs.length === 0) {
-      return res.send([]);
+      return res.status(200).send({
+        message: 'No documents found for your query',
+      });
     }
     return res.status(200).send({
-      status: 'ok',
       documents: docs,
     });
   })
-  .catch(() => res.status(400).send({
-    status: 'error',
-    message: 'We encountered an error. Please try again later',
-  }));
+  .catch(() => catchError(res));
 };
 
 export default {

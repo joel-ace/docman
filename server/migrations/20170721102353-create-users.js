@@ -21,12 +21,12 @@ module.exports = {
         unique: true,
       },
       roleId: {
-        onDelete: 'CASCADE',
         type: Sequelize.INTEGER,
         references: {
           model: 'Roles',
           key: 'roleId',
-        }
+        },
+        defaultValue: 2,
       },
       createdAt: {
         allowNull: false,

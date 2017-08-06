@@ -31,3 +31,5 @@ app.use('/api/v1', routes);
 
 /** Tell server to listen on availabe environment port or use 3000 */
 app.listen(process.env.PORT || 3000);
+
+export default app;
