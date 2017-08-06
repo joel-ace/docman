@@ -27,3 +27,4 @@ gulp.task('nodemon', ['babel'], () =>
 );
 
 gulp.task('default', ['nodemon']);
+gulp.task('production', ['babel']);

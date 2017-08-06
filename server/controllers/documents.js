@@ -80,7 +80,7 @@ const viewDocument = (req, res) => {
 
     return res.status(200).send({
       pagination: pagination(limit, offset, documents.count),
-      users: documents.rows,
+      documents: documents.rows,
     });
   })
   .catch(() => catchError(res));
