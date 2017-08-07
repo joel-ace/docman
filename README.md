@@ -1,3 +1,7 @@
+[![Code Climate](https://codeclimate.com/github/joel-ace/docman/badges/gpa.svg)](https://codeclimate.com/github/joel-ace/docman)
+[![Coverage Status](https://coveralls.io/repos/github/joel-ace/docman/badge.svg?branch=master)](https://coveralls.io/github/joel-ace/docman?branch=master)
+[![Build Status](https://travis-ci.org/joel-ace/docman.svg?branch=master)](https://travis-ci.org/joel-ace/docman)
+
 ## DocMan
 DocMan is a Document Management System built using JavaScript. DocMan is a RESTful API for creating and managing documents based on user roles. DocMan gives you the flexibility of choosing what documents you want to be private and avalable to you only or accessible by other members in the same role. 
 
