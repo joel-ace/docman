@@ -8,7 +8,7 @@
     "dev:db:migrate": "NODE_ENV=development sequelize db:migrate:undo:all && NODE_ENV=development sequelize db:migrate && NODE_ENV=development sequelize db:seed:all",
     "test:db:migrate": "NODE_ENV=test sequelize db:migrate:undo:all && NODE_ENV=test sequelize db:migrate",
     "start:test:db": "npm run test:db:migrate",
-    "server-test": "npm run start:test:db && NODE_ENV=test nyc --reporter=html --reporter=text mocha --compilers js:babel-core/register server/tests/**/*.js --timeout 90000"
+    "test": "npm run start:test:db && NODE_ENV=test nyc --reporter=html --reporter=text mocha --compilers js:babel-core/register server/tests/**/*.js --timeout 90000"
   },
   "repository": {
     "type": "git",
