@@ -1,30 +1,47 @@
 import gulp from 'gulp';
-import loadPlugins from 'gulp-load-plugins';
-import path from 'path';
+import nodemon from 'gulp-nodemon';
+import babel from 'gulp-babel';
+import shell from 'gulp-shell';
 
-/** Load gulp plugins into variable */
-const plugins = loadPlugins();
-
-const paths = {
-  js: ['./**/*.js', '!dist/**', '!node_modules/**', '!gulpfile.babel.js']
-};
-
-/** Transpile ES6 to ES5 using babel into the dist directory */
-gulp.task('babel', () =>
-  gulp.src(paths.js, { base: '.' })
-    .pipe(plugins.babel())
-    .pipe(gulp.dest('dist'))
-);
-
-/** Start server with restart on file change events*/
-gulp.task('nodemon', ['babel'], () =>
-  plugins.nodemon({
-    script: path.join('dist', 'index.js'),
+gulp.task('nodemon', ['build'], () => {
+  nodemon({
+    script: 'dist/index.js',
     ext: 'js',
-    ignore: ['README.md', '.DS_Store', 'node_modules/**/*.js', 'dist/**/*.js'],
-    tasks: ['babel']
-  })
-);
+    ignore: ['README.md', 'node_modules/**', '.DS_Store'],
+    watch: ['server']
+  });
+});
 
-gulp.task('default', ['nodemon']);
-gulp.task('production', ['babel']);
+gulp.task('dev', ['nodemon'], () => gulp.watch('server/**/*.js', ['build']));
+
+gulp.task('start', ['build'], shell.task([
+  'cross-env NODE_ENV=production node ./dist/',
+]));
+
+gulp.task('build', () => gulp.src(['./**/*.js', '!dist/**', '!node_modules/**', '!gulpfile.babel.js'])
+  .pipe(babel({
+    presets: ['es2015', 'stage-2']
+  }))
+  .pipe(gulp.dest('dist')));
+
+gulp.task('truncate-testdb', shell.task([
+  'cross-env NODE_ENV=test sequelize db:migrate:undo:all',
+]));
+
+gulp.task('migrate', ['truncate-testdb'], shell.task([
+  'NODE_ENV=test sequelize db:migrate',
+]));
+
+gulp.task('coverage', ['migrate'], shell.task([
+  'NODE_ENV=test nyc mocha ./server/tests/**/*.js --timeout 300000',
+]));
+
+gulp.task('test', ['coverage']);
+
+gulp.task('truncate', shell.task([
+  'cross-env NODE_ENV=development sequelize db:migrate:undo:all',
+]));
+
+gulp.task('migrate-dev', ['truncate'], shell.task([
+  'cross-env NODE_ENV=development sequelize db:migrate && sequelize db:seed:all',
+]));
