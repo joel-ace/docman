@@ -71,8 +71,8 @@ Contributors are welcome to further enhance the features of this API by contribu
 
 1. Fork the repository.
 2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
+3. Commit your changes: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request describing the feature(s) you have added
 
-Ensure your codes follow the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript)
+**N/B:** Ensure your codes extends the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript)

@@ -159,7 +159,6 @@ const getUserById = (req, res) => {
   .then((user) => {
     if (!user) {
       return res.status(404).send({
-        status: 'error',
         message: 'This user does not exist or has been previously deleted',
       });
     }
