@@ -2,9 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import expressValidator from 'express-validator';
 import morgan from 'morgan';
+import path from 'path';
 import routes from './server/routes/v1';
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, '../documentation')));
 
 app.use(morgan('dev'));
 
@@ -24,6 +27,11 @@ app.use((req, res, next) => {
     sent = true;
   };
   next();
+});
+
+/** render API documentation */
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'documentation', 'index.html'));
 });
 
 /** Use routes from the imported routes for api version 1 */

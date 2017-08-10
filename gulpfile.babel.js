@@ -18,7 +18,9 @@ gulp.task('start', ['build'], shell.task([
   'cross-env NODE_ENV=production node ./dist/',
 ]));
 
-gulp.task('build', () => gulp.src(['./**/*.js', '!dist/**', '!node_modules/**', '!gulpfile.babel.js'])
+gulp.task('build', () => gulp.src(
+    ['./**/*.js', '!dist/**', '!node_modules/**', '!gulpfile.babel.js', '!documentation/**']
+  )
   .pipe(babel({
     presets: ['es2015', 'stage-2']
   }))

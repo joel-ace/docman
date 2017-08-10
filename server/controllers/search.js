@@ -68,7 +68,7 @@ const searchDocument = (req, res) => {
         attributes: ['fullname', 'userId'],
       }
     ],
-    attributes: { exclude: ['content'] },
+    attributes: { exclude: ['content', 'userId'] },
   })
   .then((docs) => {
     if (docs.length === 0) {

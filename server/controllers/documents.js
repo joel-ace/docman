@@ -47,10 +47,11 @@ const createDocument = (req, res) => {
  * @returns {object} response object
  */
 const viewDocument = (req, res) => {
-  let offset = 0, limit = 20;
+  let offset = 0;
+  let limit = 20;
   if (req.query.limit || req.query.offset) {
-    req.checkQuery('limit', 'Limit must be an integer').isInt();
-    req.checkQuery('offset', 'Offset must be an integer').isInt();
+    req.checkQuery('limit', 'Limit must be an integer greater than 0').isInt({ gt: 0 });
+    req.checkQuery('offset', 'Offset must be an integer greater or equal to 0').isInt({ gt: -1 });
 
     returnValidationErrors(req, res);
 
