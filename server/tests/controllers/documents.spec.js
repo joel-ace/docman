@@ -7,7 +7,8 @@ import { passwordHash } from '../../helpers/utils';
 const expect = chai.expect;
 chai.use(http);
 
-let adminToken, secondUserToken;
+let adminToken;
+let secondUserToken;
 
 describe('Documents', () => {
   before((done) => {

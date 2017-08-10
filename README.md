@@ -1,6 +1,6 @@
 [![Code Climate](https://codeclimate.com/github/joel-ace/docman/badges/gpa.svg)](https://codeclimate.com/github/joel-ace/docman)
-[![Coverage Status](https://coveralls.io/repos/github/joel-ace/docman/badge.svg?branch=staging)](https://coveralls.io/github/joel-ace/docman?branch=staging)
-[![Build Status](https://travis-ci.org/joel-ace/docman.svg?branch=staging)](https://travis-ci.org/joel-ace/docman)
+[![Coverage Status](https://coveralls.io/repos/github/joel-ace/docman/badge.svg?branch=master)](https://coveralls.io/github/joel-ace/docman?branch=master)
+[![Build Status](https://travis-ci.org/joel-ace/docman.svg?branch=master)](https://travis-ci.org/joel-ace/docman)
 
 ## DocMan
 DocMan is a Document Management System built using JavaScript. DocMan is a RESTful API for creating and managing documents based on user roles. DocMan gives you the flexibility of choosing what documents you want to be private and available to you only or accessible by other members in the same user role you belong to. 
@@ -34,9 +34,8 @@ The following features make up the DocMan's API:
 ###### Search
 - It allows admin to retrieve all documents that matches search string
 - It allows admin to search users based on a specified search term
-- It allows users to search public documents for a specified search term
-- It allows users to search for users through name or email address
-- It allows users on the same role to search through role-based documents 
+- It allows users to search documents for a specified search term
+- It allows users to search for users using name or email address
 
 ## Technologies Used
 - **[JavaScript ES6](http://es6-features.org/)** - Codes were written in javascript ES6.
@@ -71,8 +70,8 @@ Contributors are welcome to further enhance the features of this API by contribu
 
 1. Fork the repository.
 2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
+3. Commit your changes: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request describing the feature(s) you have added
 
-Ensure your codes follow the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript)
+**N/B:** Ensure your code extends the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript)

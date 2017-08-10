@@ -105,7 +105,7 @@ export const isAuthenticated = (req, res, next) => {
               req.decoded = decoded;
               return next();
             }
-            return res.status(400).send({
+            return res.status(401).send({
               message: 'user making this request cannot be authenticated',
             });
           }

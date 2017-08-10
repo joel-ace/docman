@@ -5,7 +5,8 @@ import app from '../../../index';
 const expect = chai.expect;
 chai.use(http);
 
-let adminToken, userToken;
+let adminToken;
+let userToken;
 
 describe('Users', () => {
   describe('creating a new account ', () => {
@@ -148,7 +149,6 @@ describe('Users', () => {
         .get('/api/v1/search/users?q=Oluwatobi')
         .set({ Authorization: adminToken })
         .end((err, res) => {
-          console.log(res.body)
           expect(res.status).to.equal(200);
           expect(res.body.message).to.equal('no user found for your query');
           done();
@@ -235,6 +235,16 @@ describe('Users', () => {
           done();
         });
     });
+    it('should get a status code of 403 if an attempt is made to delete the admin account by the admin', (done) => {
+      chai.request(app)
+        .delete('/api/v1/users/1')
+        .set({ Authorization: adminToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(403);
+          expect(res.body.message).to.equal('You cannot delete this user');
+          done();
+        });
+    });
     it('should receive a status of 200 if user is successfully deleted', (done) => {
       chai.request(app)
         .delete('/api/v1/users/3')
@@ -245,12 +255,12 @@ describe('Users', () => {
           done();
         });
     });
-    it('should receive a status of 400 if user making the request does not exist in database', (done) => {
+    it('should receive a status of 401 if user making the request does not exist in database', (done) => {
       chai.request(app)
         .delete('/api/v1/users/3')
         .set({ Authorization: userToken })
         .end((err, res) => {
-          expect(res.status).to.equal(400);
+          expect(res.status).to.equal(401);
           expect(res.body.message).to.equal('user making this request cannot be authenticated');
           done();
         });

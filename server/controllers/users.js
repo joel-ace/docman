@@ -101,10 +101,11 @@ const loginUser = (req, res) => {
  */
 const viewUser = (req, res) => {
   /** set default values for offset and limit */
-  let offset = 0, limit = 20;
+  let offset = 0;
+  let limit = 20;
   if (req.query.limit || req.query.offset) {
-    req.checkQuery('limit', 'Limit must be an integer').isInt();
-    req.checkQuery('offset', 'Offset must be an integer').isInt();
+    req.checkQuery('limit', 'Limit must be an integer and greater than 0').isInt({ gt: 0 });
+    req.checkQuery('offset', 'Offset must be an integer greater or equal to 0').isInt({ gt: -1 });
 
     returnValidationErrors(req, res);
 
@@ -123,7 +124,7 @@ const viewUser = (req, res) => {
     ],
     offset,
     limit,
-    attributes: { exclude: ['password', 'updatedAt', 'roleId'] },
+    attributes: { exclude: ['email', 'password', 'updatedAt', 'roleId'] },
   })
   .then(users => res.status(200).send({
     pagination: pagination(limit, offset, users.count),
@@ -159,13 +160,11 @@ const getUserById = (req, res) => {
   .then((user) => {
     if (!user) {
       return res.status(404).send({
-        status: 'error',
         message: 'This user does not exist or has been previously deleted',
       });
     }
 
     return res.status(200).send({
-      status: 'ok',
       userDetails: user,
     });
   })
@@ -206,7 +205,6 @@ const updateUser = (req, res) => {
       userId: updatedUser.userId,
       fullname: updatedUser.fullname,
       email: updatedUser.email,
-      roleId: updatedUser.roleId,
     },
   }))
   .catch(() => catchError(res));
@@ -225,12 +223,18 @@ const deleteUser = (req, res) => {
 
   returnValidationErrors(req, res);
 
+  if (parseInt(req.params.id, 10) === 1) {
+    return res.status(403).send({
+      message: 'You cannot delete this user',
+    });
+  }
+
   Users.findOne({
     where: { userId: req.params.id },
   })
   .then((user) => {
     if (!user) {
-      res.status(404).send({
+      return res.status(404).send({
         message: 'This user does not exist or has been previously deleted',
       });
     }

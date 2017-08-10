@@ -28,6 +28,8 @@ export default (sequelize, DataTypes) => {
   Users.associate = (models) => {
     Users.hasMany(models.Documents, {
       foreignKey: 'userId',
+      onDelete: 'CASCADE',
+      hooks: true
     });
     Users.belongsTo(models.Roles, {
       foreignKey: 'roleId',
