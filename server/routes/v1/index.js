@@ -1,7 +1,7 @@
 import express from 'express';
-import userRoutes from './users';
-import documentRoutes from './documents';
-import searchRoutes from './search';
+import users from './users';
+import documents from './documents';
+import search from './search';
 
 const Router = express.Router();
 
@@ -14,8 +14,8 @@ Router.route('/')
   });
 
 /** Use imported files for users, documents and search routes */
-Router.use('/users', userRoutes);
-Router.use('/documents', documentRoutes);
-Router.use('/search', searchRoutes);
+Router.use('/users', users);
+Router.use('/documents', documents);
+Router.use('/search', search);
 
 export default Router;

@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Users } from '../models';
 
@@ -34,6 +34,20 @@ export const isRegisteredUser = (userIdentifier, type = 'id') => {
 };
 
 /**
+ * @description checks if user supplied password is same as password in database
+ * @function verifyPassword
+ * @param {string} suppliedPassword user supplied password
+ * @param {object} databasePassword password in database
+ * @returns {bolean} password verification state
+ */
+export const verifyPassword = (suppliedPassword, databasePassword) => {
+  if (bcrypt.compareSync(suppliedPassword, databasePassword)) {
+    return true;
+  }
+  return false;
+};
+
+/**
  * @description authenticates user by comparing passwords
  * @function authenticateUser
  * @param {string} userPassword user supplied password
@@ -41,8 +55,8 @@ export const isRegisteredUser = (userIdentifier, type = 'id') => {
  * @returns {string} jwt token
  */
 export const authenticateUser = (userPassword, userObject) => {
-  if (bcrypt.compareSync(userPassword, userObject.password)) {
-    const token = jwt.sign({
+  if (verifyPassword(userPassword, userObject.password)) {
+    const token = jsonwebtoken.sign({
       userId: userObject.userId,
       role: userObject.roleId,
     }, process.env.JWT_SECRET,
@@ -64,8 +78,9 @@ export const returnValidationErrors = (req, res) => {
   const errors = req.validationErrors();
 
   if (errors) {
+    const errorObject = errors.map(error => error.msg);
     return res.status(400).send({
-      errors,
+      errors: errorObject,
     });
   }
 };
@@ -81,7 +96,7 @@ export const catchError = res => res.status(503).send({
 });
 
 /**
- * @description authenticates user by comparing passwords
+ * @description middleware that authenticates user by comparing passwords
  * @function isAuthenticated
  * @param {string} req request object
  * @param {object} res response object
@@ -92,7 +107,7 @@ export const isAuthenticated = (req, res, next) => {
   const token = req.headers.authorization || req.header['x-access-token'];
   if (token) {
     /** verify if token sent is a valid token */
-    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+    jsonwebtoken.verify(token, process.env.JWT_SECRET, (error, decoded) => {
       if (error) {
         res.status(401).send({
           message: 'You are not authorized to access this resource',
@@ -100,16 +115,15 @@ export const isAuthenticated = (req, res, next) => {
       } else {
         /** check if the decoded userId exists in the user database */
         isRegisteredUser(decoded.userId)
-          .then((registrationState) => {
-            if (registrationState) {
-              req.decoded = decoded;
-              return next();
-            }
-            return res.status(401).send({
-              message: 'user making this request cannot be authenticated',
-            });
+        .then((registeredUser) => {
+          if (registeredUser) {
+            req.decoded = decoded;
+            return next();
           }
-        );
+          return res.status(401).send({
+            message: 'user making this request cannot be authenticated',
+          });
+        });
       }
     });
   } else {
@@ -120,7 +134,7 @@ export const isAuthenticated = (req, res, next) => {
 };
 
 /**
- * @description checks if user role is admin
+ * @description middleware that checks if user role is admin
  * @function isAdmin
  * @param {string} req request object
  * @param {object} res response object
@@ -131,13 +145,13 @@ export const isAdmin = (req, res, next) => {
   if (req.decoded.role === 1) {
     return next();
   }
-  res.status(401).send({
-    message: 'Only admins are authorized to access this resource',
+  res.status(403).send({
+    message: 'Only admins are allowed to access this resource',
   });
 };
 
 /**
- * @description checks if resource belongs to owner
+ * @description middleware that checks if resource belongs to owner
  * @function isUserOwn
  * @param {string} req request object
  * @param {object} res response object
@@ -148,14 +162,14 @@ export const isUserOwn = (req, res, next) => {
   if (req.decoded.userId === parseInt(req.params.id, 10)) {
     next();
   } else {
-    res.status(401).send({
+    res.status(403).send({
       message: 'Only the owner can access this resource',
     });
   }
 };
 
 /**
- * @description checks if user is an admin or is the owner of resource
+ * @description middleware that checks if user is an admin or is the owner of resource
  * @function isAdminOrUserOwn
  * @param {string} req request object
  * @param {object} res response object
@@ -166,7 +180,7 @@ export const isAdminOrUserOwn = (req, res, next) => {
   if (req.decoded.userId === parseInt(req.params.id, 10) || req.decoded.role === 1) {
     next();
   } else {
-    res.status(401).send({
+    res.status(403).send({
       message: 'Only the owner or an admin can access this resource',
     });
   }

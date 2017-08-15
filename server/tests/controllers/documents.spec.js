@@ -1,11 +1,11 @@
 import chai from 'chai';
-import http from 'chai-http';
-import app from '../../../index';
+import chaiHTTP from 'chai-http';
+import app from '../../../app';
 import { Users, Roles, Documents } from '../../models';
 import { passwordHash } from '../../helpers/utils';
 
 const expect = chai.expect;
-chai.use(http);
+chai.use(chaiHTTP);
 
 let adminToken;
 let secondUserToken;
@@ -178,7 +178,7 @@ describe('Documents', () => {
     });
   });
   describe('search', () => {
-    it('should return a status code of 200 if search query matched document title', (done) => {
+    it('should return a status code of 200 if search query matches document title', (done) => {
       chai.request(app)
         .get('/api/v1/search/documents?q=document')
         .set({ Authorization: adminToken })
@@ -193,7 +193,7 @@ describe('Documents', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('No documents found for your query');
+          expect(res.body.message).to.equal('No documents found for your search query');
           done();
         });
     });
@@ -211,27 +211,36 @@ describe('Documents', () => {
             done();
           });
     });
-    it('should return a status code of 401 if user requesting to update details is not account owner', (done) => {
+    it('should return a status code of 403 if user requesting to update details is not account owner', (done) => {
       chai.request(app)
         .put('/api/v1/documents/1')
         .set({ Authorization: secondUserToken })
+        .send({
+          title: 'tsljalkja',
+          content: 'his is DocMan User Second article',
+          access: 'public',
+        })
         .end((err, res) => {
-          expect(res.status).to.equal(401);
+          expect(res.status).to.equal(403);
           expect(res.body.message).to.equal('Only the document owner can update a document');
           done();
         });
     });
-    it('should return a status of 200 if document is successfully updated and update only the title if no content is supplied', (done) => {
+    it('should return a status of 200 if document is successfully updated', (done) => {
       chai.request(app)
         .put('/api/v1/documents/1')
         .send({
           title: 'A new title',
-          content: '',
-          role: 'role',
+          content: 'This is the new content',
+          access: 'role',
         })
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.document.documentId).to.equal(1);
+          expect(res.body.document.content).to.equal('This is the new content');
+          expect(res.body.document.access).to.equal('role');
+          expect(res.body.document.title).to.equal('A new title');
           done();
         });
     });
@@ -241,7 +250,7 @@ describe('Documents', () => {
         .send({
           title: 'A new title',
           content: 'this is the new content',
-          role: 'role',
+          access: 'role',
         })
         .set({ Authorization: adminToken })
         .end((err, res) => {
@@ -251,12 +260,12 @@ describe('Documents', () => {
     });
   });
   describe('delete request', () => {
-    it('should return a status code of 401 if user is not admin or document owner', (done) => {
+    it('should return a status code of 403 if user is not admin or document owner', (done) => {
       chai.request(app)
         .delete('/api/v1/documents/3')
         .set({ Authorization: secondUserToken })
         .end((err, res) => {
-          expect(res.status).to.equal(401);
+          expect(res.status).to.equal(403);
           expect(res.body.message).to.equal('Only the document owner or admin can delete a document');
           done();
         });
