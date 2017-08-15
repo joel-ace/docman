@@ -1,9 +1,9 @@
 import chai from 'chai';
-import http from 'chai-http';
-import app from '../../../index';
+import chaiHTTP from 'chai-http';
+import app from '../../../app';
 
 const expect = chai.expect;
-chai.use(http);
+chai.use(chaiHTTP);
 
 describe('Index route', () => {
   it('should return a status code of 200 and welcome message when accessed', (done) => {

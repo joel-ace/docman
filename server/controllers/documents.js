@@ -15,12 +15,11 @@ import {
  * @returns {object} response object
  */
 const createDocument = (req, res) => {
-  req.checkBody('title', 'fullname cannot be empty').notEmpty();
+  req.checkBody('title', 'title cannot be empty').notEmpty();
   req.checkBody('content', 'content cannot be empty').notEmpty();
   req.checkBody('access', 'access cannot be empty').notEmpty();
-  req.checkBody('access', 'public, private and role are the only allowed acces types')
+  req.checkBody('access', 'public, private and role are the only allowed access types')
     .isIn(['public', 'private', 'role']);
-  req.checkBody('access', 'only letters of the alphabets are allowed as access').isAlpha();
 
   returnValidationErrors(req, res);
 
@@ -33,7 +32,6 @@ const createDocument = (req, res) => {
   .then(
     document => res.status(201).send({
       document,
-      message: 'document was successfully created',
     })
   )
   .catch(() => catchError(res));
@@ -74,7 +72,7 @@ const viewDocument = (req, res) => {
   })
   .then((documents) => {
     if (documents.rows.length < 1) {
-      return res.status(200).send({
+      return res.status(404).send({
         message: 'No document found',
       });
     }
@@ -125,8 +123,8 @@ const getDocumentById = (req, res) => {
       });
     }
 
-    return res.status(401).send({
-      message: 'You are not authorized to view this document',
+    return res.status(403).send({
+      message: 'You are not allowed to view this document',
     });
   })
   .catch(() => catchError(res));
@@ -142,6 +140,11 @@ const getDocumentById = (req, res) => {
 const updateDocument = (req, res) => {
   req.checkParams('id', 'No document id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as document id').isInt();
+  req.checkBody('title', 'title cannot be empty').notEmpty();
+  req.checkBody('content', 'content cannot be empty').notEmpty();
+  req.checkBody('access', 'access cannot be empty').notEmpty();
+  req.checkBody('access', 'public, private and role are the only allowed access types')
+    .isIn(['public', 'private', 'role']);
 
   returnValidationErrors(req, res);
 
@@ -162,7 +165,7 @@ const updateDocument = (req, res) => {
         access: req.body.access || document.access,
       });
     }
-    return res.status(401).send({
+    return res.status(403).send({
       message: 'Only the document owner can update a document',
     });
   })
@@ -199,7 +202,7 @@ const deleteDocument = (req, res) => {
     if (req.decoded.userId === document.userId || req.decoded.role === 1) {
       return document.destroy();
     }
-    return res.status(401).send({
+    return res.status(403).send({
       message: 'Only the document owner or admin can delete a document',
     });
   })

@@ -6,6 +6,7 @@ import {
   returnValidationErrors,
   isRegisteredUser,
   pagination,
+  verifyPassword,
 } from '../helpers/utils';
 
 /**
@@ -25,13 +26,13 @@ const createUser = (req, res) => {
 
   /** check if provided email already exists in user database */
   isRegisteredUser(req.body.email, 'email')
-  .then((registrationState) => {
-    if (registrationState) {
-      return res.status(400).send({
+  .then((registeredUser) => {
+    if (registeredUser) {
+      return res.status(409).send({
         message: 'an account with this email already exists',
       });
     }
-    if (!registrationState) {
+    if (!registeredUser) {
       return Users.create({
         fullname: req.body.fullname,
         password: passwordHash(req.body.password),
@@ -41,14 +42,13 @@ const createUser = (req, res) => {
     }
   })
   .then(newUser => res.status(201).send({
-    userDetails: {
+    user: {
       userId: newUser.userId,
       fullname: newUser.fullname,
       email: newUser.email,
       roleId: newUser.roleId,
       created: newUser.createdAt,
     },
-    message: 'Account creation was successful',
   }))
   .catch(() => catchError(res));
 };
@@ -72,7 +72,7 @@ const loginUser = (req, res) => {
   })
   .then((user) => {
     if (!user) {
-      return res.status(404).send({
+      return res.status(401).send({
         message: 'This email is not associated with any account',
       });
     }
@@ -82,10 +82,9 @@ const loginUser = (req, res) => {
     if (token) {
       return res.status(200).send({
         accessToken: token,
-        message: 'Login was successful!',
       });
     }
-    return res.status(400).send({
+    return res.status(401).send({
       message: 'Authentication failed. Password is incorrect',
     });
   })
@@ -128,7 +127,7 @@ const viewUser = (req, res) => {
   })
   .then(users => res.status(200).send({
     pagination: pagination(limit, offset, users.count),
-    users: users.rows,
+    users: users.rows.filter(user => user.userId !== 1),
   }))
   .catch(() => catchError(res));
 };
@@ -165,7 +164,7 @@ const getUserById = (req, res) => {
     }
 
     return res.status(200).send({
-      userDetails: user,
+      user,
     });
   })
   .catch(() => catchError(res));
@@ -181,6 +180,10 @@ const getUserById = (req, res) => {
 const updateUser = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
+  req.checkBody('email', 'Email cannot be empty').notEmpty();
+  req.checkBody('email', 'Enter a valid email address').isEmail();
+  req.checkBody('password', 'Password cannot be empty').notEmpty();
+  req.checkBody('oldPassword', 'Enter your current password to confirm password change').notEmpty();
 
   returnValidationErrors(req, res);
 
@@ -190,6 +193,12 @@ const updateUser = (req, res) => {
   })
   .then((user) => {
     user.get({ plain: true });
+
+    if (req.body.password && !verifyPassword(req.body.oldPassword, user.password)) {
+      return res.status(403).send({
+        message: 'Password confirmation failed. Enter your current password to confirm password change'
+      });
+    }
 
     const password = req.body.password ? passwordHash(req.body.password) : user.password;
 
@@ -201,7 +210,7 @@ const updateUser = (req, res) => {
     });
   })
   .then(updatedUser => res.status(200).send({
-    userDetails: {
+    user: {
       userId: updatedUser.userId,
       fullname: updatedUser.fullname,
       email: updatedUser.email,

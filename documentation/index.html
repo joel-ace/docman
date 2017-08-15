@@ -421,11 +421,11 @@
   <span class="s2">"users"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman Admin"</span><span class="p">,</span>
+      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman User"</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
       <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"admin"</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"subscriber"</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">]</span>
@@ -473,14 +473,13 @@
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"userDetails"</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
     <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
     <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="s2">"created"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span>
   <span class="p">},</span>
-  <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Account creation was successful"</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-2'>Request</h3>
 <ul>
@@ -497,7 +496,7 @@
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"userDetails"</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
     <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Emmanuel Johnson"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"emma@johnson.com"</span><span class="p">,</span>
@@ -527,16 +526,17 @@
   <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
   <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
   <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"@Abit0739Qbr5SafE!"</span><span class="p">,</span>
+  <span class="s2">"oldPassword"</span><span class="p">:</span> <span class="s2">"unsafe"</span><span class="p">,</span>
 <span class="p">}</span>
 </code></pre>
 <blockquote>
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"userDetails"</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
     <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
-    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"admin@docmfan.com"</span><span class="p">,</span>
+    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"james@doe.com"</span><span class="p">,</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-4'>Request</h3>
@@ -581,7 +581,6 @@
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"accessToken"</span><span class="p">:</span> <span class="s2">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCD9.eyJ1c2VySWQiOjQsInJvbGUiOjIsImlhdCI6MTUwMjMzMTYwNiwiZXhwIjoxNTAyNDE4MDA2fQ.Ld-n1FTaeUkBJ99w0IlhZPK-EV-be_1jb-oIUED8rPU"</span><span class="p">,</span>
-  <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Login was successful!"</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-6'>Request</h3>
 <ul>
@@ -711,7 +710,6 @@
     <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span><span class="p">,</span>
     <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span>
   <span class="p">},</span>
-  <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"document was successfully created"</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-2'>Request</h3>
 <ul>
@@ -758,6 +756,8 @@
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Game of Thrones"</span>
+  <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"Jon the snow"</span><span class="p">,</span>
+  <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"role"</span>
 <span class="p">}</span>
 </code></pre>
 <blockquote>
@@ -922,27 +922,27 @@
 </thead><tbody>
 <tr>
 <td>400</td>
-<td>Bad Request -- Your request sucks.</td>
+<td>Bad Request -- You&#39;re sending a request with bad/not properly formatted parameters</td>
 </tr>
 <tr>
 <td>401</td>
-<td>Unauthorized -- Your API key is wrong or you do not have sufficient privilege.</td>
+<td>Unauthorized -- You are not authenticated or your authentication token is wrong</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden -- Your request was understood but will not be fulfilled because you do not have sufficient privileges.</td>
 </tr>
 <tr>
 <td>404</td>
 <td>Not Found -- What you requested for could not be found.</td>
 </tr>
 <tr>
-<td>405</td>
-<td>Method Not Allowed -- You tried to access a kitten with an invalid method.</td>
+<td>409</td>
+<td>Conflict -- The request could not be completed due to a conflict with the current state of the target resource.</td>
 </tr>
 <tr>
 <td>500</td>
 <td>Internal Server Error -- We had a problem with our server. Try again later.</td>
-</tr>
-<tr>
-<td>503</td>
-<td>Service Unavailable -- We&#39;re temporarily unavailable. Please try again later.</td>
 </tr>
 </tbody></table>
 

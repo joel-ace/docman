@@ -2,7 +2,7 @@
   "name": "docman",
   "version": "1.0.0",
   "description": "Docman is a Document Management System API",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node node_modules/gulp/bin/gulp start",
     "dev-migrate": "node node_modules/gulp/bin/gulp migrate-dev",
