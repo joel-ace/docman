@@ -37,6 +37,13 @@ app.get('/', (req, res) => {
 /** Use routes from the imported routes for api version 1 */
 app.use('/api/v1', routes);
 
+/** default message for every other route */
+app.use('*', (req, res) => (
+  res.status(404).send({
+    message: 'this resource does not exist or has been previously deleted',
+  })
+));
+
 /** Tell server to listen on availabe environment port or use 3000 */
 app.listen(process.env.PORT || 3000);
 

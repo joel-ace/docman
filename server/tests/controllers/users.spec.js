@@ -1,9 +1,9 @@
 import chai from 'chai';
-import http from 'chai-http';
-import app from '../../../index';
+import chaiHTTP from 'chai-http';
+import app from '../../../app';
 
 const expect = chai.expect;
-chai.use(http);
+chai.use(chaiHTTP);
 
 let adminToken;
 let userToken;
@@ -22,10 +22,14 @@ describe('Users', () => {
         )
         .end((err, res) => {
           expect(res.status).to.equal(201);
+          expect(res.body.user.userId).to.equal(3);
+          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.email).to.equal('emeka@obi.com');
+          expect(res.body.user.roleId).to.equal(2);
           done();
         });
     });
-    it('should get an error message and status code 400 if user already exists', (done) => {
+    it('should get an error message and status code 409 if user already exists', (done) => {
       chai.request(app)
         .post('/api/v1/users')
         .send({
@@ -35,14 +39,15 @@ describe('Users', () => {
           email: 'emeka@obi.com',
         })
         .end((err, res) => {
-          expect(res.status).to.equal(400);
+          expect(res.status).to.equal(409);
           expect(res.body).include.keys(['message']);
+          expect(res.body.message).to.equal('an account with this email already exists');
           done();
         });
     });
   });
   describe('during login', () => {
-    it('should get an error message and status code 404 if user does not exists', (done) => {
+    it('should get an error message and status code 401 if email supplied does not exist', (done) => {
       chai.request(app)
         .post('/api/v1/users/login')
         .send({
@@ -50,11 +55,12 @@ describe('Users', () => {
           email: 'emeka@admin.com',
         })
         .end((err, res) => {
-          expect(res.status).to.equal(404);
+          expect(res.status).to.equal(401);
+          expect(res.body.message).to.equal('This email is not associated with any account');
           done();
         });
     });
-    it('should get an error message and status code 400 if password is incorrect', (done) => {
+    it('should get an error message and status code 401 if password is incorrect', (done) => {
       chai.request(app)
         .post('/api/v1/users/login')
         .send({
@@ -62,7 +68,8 @@ describe('Users', () => {
           email: 'admin@docman.com',
         })
         .end((err, res) => {
-          expect(res.status).to.equal(400);
+          expect(res.status).to.equal(401);
+          expect(res.body.message).to.equal('Authentication failed. Password is incorrect');
           done();
         });
     });
@@ -76,7 +83,7 @@ describe('Users', () => {
         .end((err, res) => {
           adminToken = res.body.accessToken;
           expect(res.status).to.equal(200);
-          expect(res.body).to.have.keys(['accessToken', 'message']);
+          expect(res.body).to.have.keys(['accessToken']);
           done();
         });
     });
@@ -88,6 +95,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
+          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -98,6 +107,10 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(Array.isArray(res.body.users));
+          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
+          expect(res.body.users[0].userId).to.equal(3);
+          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[1].userId).to.equal(2);
           done();
         });
     });
@@ -107,7 +120,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.body).to.have.keys(['users', 'pagination']);
-          expect(res.body.users.length).to.equal(2);
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0].fullname).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -129,7 +143,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.userDetails));
+          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.email).to.equal('emeka@obi.com');
           done();
         });
     });
@@ -150,7 +165,7 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.message).to.equal('no user found for your query');
+          expect(res.body.message).to.equal('no user found for your search query');
           done();
         });
     });
@@ -168,12 +183,12 @@ describe('Users', () => {
             done();
           });
     });
-    it('should get a status code of 401 if user requesting to update details is not account owner', (done) => {
+    it('should get a status code of 403 if user requesting to update details is not account owner', (done) => {
       chai.request(app)
         .put('/api/v1/users/1')
         .set({ Authorization: userToken })
         .end((err, res) => {
-          expect(res.status).to.equal(401);
+          expect(res.status).to.equal(403);
           expect(res.body.message).to.equal('Only the owner can access this resource');
           done();
         });
@@ -182,12 +197,52 @@ describe('Users', () => {
       chai.request(app)
         .put('/api/v1/users/3')
         .send({
-          password: '',
-          fullname: 'Chukwuemeka Obi',
+          oldPassword: 'password',
+          password: 'newPassword',
+          fullname: 'Chukwuemeka Obinna',
+          email: 'emeka@obinna.com',
         })
         .set({ Authorization: userToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.user.fullname).to.equal('Chukwuemeka Obinna');
+          expect(res.body.user.email).to.equal('emeka@obinna.com');
+          done();
+        });
+    });
+    it('should receive a status of 400 if old password is not provided for password change', (done) => {
+      chai.request(app)
+        .put('/api/v1/users/3')
+        .send({
+          password: 'newPassword',
+          fullname: 'Chukwuemeka Obinna',
+          email: 'new@email.com',
+        })
+        .set({ Authorization: userToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(400);
+          expect(Array.isArray(res.body.errors));
+          expect(res.body.errors[0]).to.equal(
+            'Enter your current password to confirm password change'
+          );
+          done();
+        });
+    });
+    it('should receive a status of 403 if old password provided is not user password', (done) => {
+      chai.request(app)
+        .put('/api/v1/users/3')
+        .send({
+          oldPassword: 'hbnjkdnfjgfgfd',
+          password: 'newPassword',
+          fullname: 'Chukwuemeka Obinna',
+          email: 'new@email.com',
+        })
+        .set({ Authorization: userToken })
+        .end((err, res) => {
+          expect(res.status).to.equal(403);
+          expect(res.body.message).to.equal(
+            'Password confirmation failed. Enter your current password to confirm password change'
+          );
           done();
         });
     });
@@ -220,17 +275,19 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).include.keys(['documents']);
+          expect(res.body.documents[0].title).to.equal('A new title');
+          expect(res.body.documents[0].access).to.equal('role');
           done();
         });
     });
   });
   describe('deleting a user', () => {
-    it('should get a status code of 401 if user is not admin', (done) => {
+    it('should get a status code of 403 if user is not admin', (done) => {
       chai.request(app)
         .delete('/api/v1/users/1')
         .set({ Authorization: userToken })
         .end((err, res) => {
-          expect(res.status).to.equal(401);
+          expect(res.status).to.equal(403);
           expect(res.body.message).to.equal('Only the owner or an admin can access this resource');
           done();
         });

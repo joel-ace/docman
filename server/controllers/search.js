@@ -34,7 +34,7 @@ const searchUser = (req, res) => {
   .then((users) => {
     if (users.length === 0) {
       return res.status(200).send({
-        message: 'no user found for your query',
+        message: 'no user found for your search query',
       });
     }
     return res.status(200).send({
@@ -70,14 +70,14 @@ const searchDocument = (req, res) => {
     ],
     attributes: { exclude: ['content', 'userId'] },
   })
-  .then((docs) => {
-    if (docs.length === 0) {
+  .then((documents) => {
+    if (documents.length === 0) {
       return res.status(200).send({
-        message: 'No documents found for your query',
+        message: 'No documents found for your search query',
       });
     }
     return res.status(200).send({
-      documents: docs,
+      documents,
     });
   })
   .catch(() => catchError(res));

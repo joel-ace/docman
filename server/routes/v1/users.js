@@ -1,5 +1,5 @@
 import express from 'express';
-import Users from '../../controllers/users';
+import users from '../../controllers/users';
 import {
   isAuthenticated,
   isUserOwn,
@@ -9,18 +9,18 @@ import {
 const Router = express.Router();
 
 Router.route('/')
-  .get([isAuthenticated], Users.viewUser)
-  .post(Users.createUser);
+  .get([isAuthenticated], users.viewUser)
+  .post(users.createUser);
 
 Router.route('/:id')
-  .get([isAuthenticated], Users.getUserById)
-  .put([isAuthenticated, isUserOwn], Users.updateUser)
-  .delete([isAuthenticated, isAdminOrUserOwn], Users.deleteUser);
+  .get([isAuthenticated], users.getUserById)
+  .put([isAuthenticated, isUserOwn], users.updateUser)
+  .delete([isAuthenticated, isAdminOrUserOwn], users.deleteUser);
 
 Router.route('/:id/documents')
-  .get([isAuthenticated], Users.getUserDocuments);
+  .get([isAuthenticated], users.getUserDocuments);
 
 Router.route('/login')
-  .post(Users.loginUser);
+  .post(users.loginUser);
 
 export default Router;
