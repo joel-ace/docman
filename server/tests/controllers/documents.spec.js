@@ -104,6 +104,10 @@ describe('Documents', () => {
         )
         .end((err, res) => {
           expect(res.status).to.equal(201);
+          expect(res.body.document.documentId).to.equal(3);
+          expect(res.body.document.title).to.equal('Added new document');
+          expect(res.body.document.content).to.equal('Content from the newly added document during testing');
+          expect(res.body.document.access).to.equal('public');
           done();
         });
     });
@@ -120,6 +124,7 @@ describe('Documents', () => {
         )
         .end((err, res) => {
           expect(res.status).to.equal(400);
+          expect(res.body.errors[0]).to.equal('public, private and role are the only allowed access types');
           done();
         });
     });
@@ -141,6 +146,11 @@ describe('Documents', () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(Array.isArray(res.body.documents));
+          expect(res.body.pagination.pageSize).to.equal(3);
+          expect(res.body.documents[0].title).to.equal('Admin document');
+          expect(res.body.documents[0].access).to.equal('public');
+          expect(res.body.documents[2].title).to.equal('Added new document');
+          expect(res.body.documents[2].access).to.equal('public');
           done();
         });
     });
@@ -151,6 +161,11 @@ describe('Documents', () => {
         .end((err, res) => {
           expect(res.body).to.have.keys(['documents', 'pagination']);
           expect(res.body.documents.length).to.equal(2);
+          expect(res.body.pagination.pageSize).to.equal(2);
+          expect(res.body.documents[0].title).to.equal('Admin document');
+          expect(res.body.documents[0].access).to.equal('public');
+          expect(res.body.documents[1].title).to.equal('User document');
+          expect(res.body.documents[1].access).to.equal('public');
           done();
         });
     });
@@ -166,13 +181,15 @@ describe('Documents', () => {
           done();
         });
     });
-    it('should receive a status of 200 and an array of document object', (done) => {
+    it('should receive a status of 200 and document object', (done) => {
       chai.request(app)
         .get('/api/v1/documents/1')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body.document).to.be.an('object');
+          expect(res.body.document.title).to.equal('Admin document');
+          expect(res.body.document.content).to.equal('This is content for admin document');
           done();
         });
     });
@@ -184,6 +201,10 @@ describe('Documents', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.documents[0].title).to.equal('Admin document');
+          expect(res.body.documents[0].access).to.equal('public');
+          expect(res.body.documents[2].title).to.equal('Added new document');
+          expect(res.body.documents[2].access).to.equal('public');
           done();
         });
     });
@@ -255,6 +276,7 @@ describe('Documents', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
+          expect(res.body.message).to.equal('This document does not exist or has been previously deleted');
           done();
         });
     });

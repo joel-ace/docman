@@ -91,7 +91,7 @@ export const returnValidationErrors = (req, res) => {
  * @param {object} res response object
  * @returns {object} response containing error message
  */
-export const catchError = res => res.status(503).send({
+export const catchError = res => res.status(500).send({
   message: 'We encountered an error. Please try again later',
 });
 

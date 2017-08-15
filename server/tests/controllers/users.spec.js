@@ -22,6 +22,10 @@ describe('Users', () => {
         )
         .end((err, res) => {
           expect(res.status).to.equal(201);
+          expect(res.body.user.userId).to.equal(3);
+          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.email).to.equal('emeka@obi.com');
+          expect(res.body.user.roleId).to.equal(2);
           done();
         });
     });
@@ -52,6 +56,7 @@ describe('Users', () => {
         })
         .end((err, res) => {
           expect(res.status).to.equal(401);
+          expect(res.body.message).to.equal('This email is not associated with any account');
           done();
         });
     });
@@ -90,6 +95,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
+          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -114,6 +121,7 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.body).to.have.keys(['users', 'pagination']);
           expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0].fullname).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -135,7 +143,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(Array.isArray(res.body.userDetails));
+          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.email).to.equal('emeka@obi.com');
           done();
         });
     });
@@ -191,11 +200,13 @@ describe('Users', () => {
           oldPassword: 'password',
           password: 'newPassword',
           fullname: 'Chukwuemeka Obinna',
-          email: 'emeka@obi.com',
+          email: 'emeka@obinna.com',
         })
         .set({ Authorization: userToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.user.fullname).to.equal('Chukwuemeka Obinna');
+          expect(res.body.user.email).to.equal('emeka@obinna.com');
           done();
         });
     });
@@ -264,6 +275,8 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).include.keys(['documents']);
+          expect(res.body.documents[0].title).to.equal('A new title');
+          expect(res.body.documents[0].access).to.equal('role');
           done();
         });
     });
