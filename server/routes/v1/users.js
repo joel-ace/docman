@@ -3,22 +3,23 @@ import users from '../../controllers/users';
 import {
   isAuthenticated,
   isUserOwn,
-  isAdminOrUserOwn
+  isAdminOrUserOwn,
+  isAdmin
 } from '../../helpers/utils';
 
 const Router = express.Router();
 
 Router.route('/')
-  .get([isAuthenticated], users.viewUser)
+  .get([isAuthenticated, isAdmin], users.viewUser)
   .post(users.createUser);
 
 Router.route('/:id')
-  .get([isAuthenticated], users.getUserById)
+  .get([isAuthenticated, isAdminOrUserOwn], users.getUserById)
   .put([isAuthenticated, isUserOwn], users.updateUser)
   .delete([isAuthenticated, isAdminOrUserOwn], users.deleteUser);
 
 Router.route('/:id/documents')
-  .get([isAuthenticated], users.getUserDocuments);
+  .get([isAuthenticated, isAdminOrUserOwn], users.getUserDocuments);
 
 Router.route('/login')
   .post(users.loginUser);

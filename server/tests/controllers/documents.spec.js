@@ -31,7 +31,7 @@ describe('Documents', () => {
     ))
     .then(() => Users.create(
       {
-        fullname: 'Admin Account',
+        fullName: 'Admin Account',
         password: passwordHash('qwerty'),
         email: 'admin@docman.com',
         roleId: 1,
@@ -70,7 +70,7 @@ describe('Documents', () => {
           .send({
             password: 'password',
             email: 'ola@haruna.com',
-            fullname: 'Olalekan Haruna',
+            fullName: 'Olalekan Haruna',
           })
           .end((err, res) => {
             secondUserToken = res.body.accessToken;

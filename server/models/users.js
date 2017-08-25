@@ -6,7 +6,7 @@ export default (sequelize, DataTypes) => {
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    fullname: {
+    fullName: {
       allowNull: false,
       type: DataTypes.STRING,
     },

@@ -15,7 +15,7 @@ describe('Users', () => {
         .post('/api/v1/users')
         .send(
         {
-          fullname: 'Emeka Obi',
+          fullName: 'Emeka Obi',
           password: 'password',
           email: 'emeka@obi.com',
         }
@@ -23,7 +23,7 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.status).to.equal(201);
           expect(res.body.user.userId).to.equal(3);
-          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.fullName).to.equal('Emeka Obi');
           expect(res.body.user.email).to.equal('emeka@obi.com');
           expect(res.body.user.roleId).to.equal(2);
           done();
@@ -34,7 +34,7 @@ describe('Users', () => {
         .post('/api/v1/users')
         .send({
           userId: 40,
-          fullname: 'Emeka Obi',
+          fullName: 'Emeka Obi',
           password: 'password',
           email: 'emeka@obi.com',
         })
@@ -95,8 +95,8 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
-          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[0].fullName).to.equal('Emeka Obi');
+          expect(res.body.users[1].fullName).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -107,9 +107,9 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(Array.isArray(res.body.users));
-          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
+          expect(res.body.users[0].fullName).to.equal('Emeka Obi');
           expect(res.body.users[0].userId).to.equal(3);
-          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[1].fullName).to.equal('Olalekan Haruna');
           expect(res.body.users[1].userId).to.equal(2);
           done();
         });
@@ -121,7 +121,7 @@ describe('Users', () => {
         .end((err, res) => {
           expect(res.body).to.have.keys(['users', 'pagination']);
           expect(res.body.users.length).to.equal(1);
-          expect(res.body.users[0].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[0].fullName).to.equal('Olalekan Haruna');
           done();
         });
     });
@@ -143,7 +143,7 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.fullName).to.equal('Emeka Obi');
           expect(res.body.user.email).to.equal('emeka@obi.com');
           done();
         });
@@ -199,13 +199,13 @@ describe('Users', () => {
         .send({
           oldPassword: 'password',
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'emeka@obinna.com',
         })
         .set({ Authorization: userToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.user.fullname).to.equal('Chukwuemeka Obinna');
+          expect(res.body.user.fullName).to.equal('Chukwuemeka Obinna');
           expect(res.body.user.email).to.equal('emeka@obinna.com');
           done();
         });
@@ -215,7 +215,7 @@ describe('Users', () => {
         .put('/api/v1/users/3')
         .send({
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'new@email.com',
         })
         .set({ Authorization: userToken })
@@ -234,7 +234,7 @@ describe('Users', () => {
         .send({
           oldPassword: 'hbnjkdnfjgfgfd',
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'new@email.com',
         })
         .set({ Authorization: userToken })

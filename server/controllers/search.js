@@ -1,5 +1,10 @@
-import { Users, Roles, Documents } from '../models';
-import { returnValidationErrors, catchError } from '../helpers/utils';
+import { Users, Documents } from '../models';
+import {
+  returnValidationErrors,
+  catchError,
+  pagination,
+  offsetAndLimitHandler
+} from '../helpers/utils';
 
 /**
  * @description searches for a user
@@ -9,36 +14,38 @@ import { returnValidationErrors, catchError } from '../helpers/utils';
  * @returns {object} response object
  */
 const searchUser = (req, res) => {
+  const offsetAndLimitObject = offsetAndLimitHandler(req);
   req.checkQuery('q', 'an email or name is required').notEmpty();
   returnValidationErrors(req, res);
 
-  Users.findAll({
+  Users.findAndCount({
+    offset: offsetAndLimitObject.offset,
+    limit: offsetAndLimitObject.limit,
     where: {
       $or: [
         {
           email: { $iLike: `%${req.query.q}%` }
         },
         {
-          fullname: { $iLike: `%${req.query.q}%` }
+          fullName: { $iLike: `%${req.query.q}%` }
         }
       ]
     },
-    include: [
-      {
-        model: Roles,
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      }
-    ],
     attributes: { exclude: ['password', 'updatedAt'] },
   })
   .then((users) => {
     if (users.length === 0) {
-      return res.status(200).send({
+      return res.status(404).send({
         message: 'no user found for your search query',
       });
     }
     return res.status(200).send({
-      users,
+      pagination: pagination(
+        offsetAndLimitObject.limit,
+        offsetAndLimitObject.offset,
+        users.count
+      ),
+      users: users.rows,
     });
   })
   .catch(() => catchError(res));
@@ -52,32 +59,34 @@ const searchUser = (req, res) => {
  * @returns {object} response object
  */
 const searchDocument = (req, res) => {
+  const offsetAndLimitObject = offsetAndLimitHandler(req);
   req.checkQuery('q', 'a document title is required').notEmpty();
 
   returnValidationErrors(req, res);
 
-  Documents.findAll({
+  Documents.findAndCount({
+    offset: offsetAndLimitObject.offset,
+    limit: offsetAndLimitObject.limit,
     where: {
       title: {
         $iLike: `%${req.query.q}%`,
       }
     },
-    include: [
-      {
-        model: Users,
-        attributes: ['fullname', 'userId'],
-      }
-    ],
     attributes: { exclude: ['content', 'userId'] },
   })
   .then((documents) => {
-    if (documents.length === 0) {
-      return res.status(200).send({
+    if (documents.rows.length === 0) {
+      return res.status(404).send({
         message: 'No documents found for your search query',
       });
     }
     return res.status(200).send({
-      documents,
+      pagination: pagination(
+        offsetAndLimitObject.limit,
+        offsetAndLimitObject.offset,
+        documents.count
+      ),
+      documents: documents.rows,
     });
   })
   .catch(() => catchError(res));

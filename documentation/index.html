@@ -400,7 +400,7 @@
 </thead><tbody>
 <tr>
 <td>GET /api/v1/search/users/?q=${query}</td>
-<td>Gets all users with fullname or email containing the search query</td>
+<td>Gets all users with fullName or email containing the search query</td>
 </tr>
 <tr>
 <td>GET /api/v1/search/documents/?q=${query}</td>
@@ -421,7 +421,7 @@
   <span class="s2">"users"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman User"</span><span class="p">,</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Docman User"</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
       <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
@@ -464,7 +464,7 @@
 <p>Request:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+  <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
   <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
   <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"unsafe"</span><span class="p">,</span>
 <span class="p">}</span>
@@ -475,7 +475,7 @@
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
     <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="s2">"created"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span>
@@ -498,7 +498,7 @@
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Emmanuel Johnson"</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Emmanuel Johnson"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"emma@johnson.com"</span><span class="p">,</span>
     <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span><span class="p">,</span>
     <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span><span class="p">,</span>
@@ -523,7 +523,7 @@
 <p>Request:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
+  <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
   <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
   <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"@Abit0739Qbr5SafE!"</span><span class="p">,</span>
   <span class="s2">"oldPassword"</span><span class="p">:</span> <span class="s2">"unsafe"</span><span class="p">,</span>
@@ -535,7 +535,7 @@
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"james@doe.com"</span><span class="p">,</span>
   <span class="p">}</span>
 <span class="p">}</span>
@@ -643,7 +643,7 @@
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Emmanuel Soup"</span>
+        <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Emmanuel Soup"</span>
       <span class="p">}</span>
     <span class="p">},</span>
     <span class="p">{</span>
@@ -654,7 +654,7 @@
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Blunt"</span>
+        <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"James Blunt"</span>
       <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">]</span>
@@ -736,7 +736,7 @@
     <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span><span class="p">,</span>
     <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman Admin"</span><span class="p">,</span>
+        <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Docman Admin"</span><span class="p">,</span>
         <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span>
     <span class="p">}</span>
   <span class="p">}</span>
@@ -810,7 +810,7 @@
   <span class="s2">"users"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Chief Jegede Sokoya"</span><span class="p">,</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Chief Jegede Sokoya"</span><span class="p">,</span>
       <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"jegs@sokoya.com"</span><span class="p">,</span>
       <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
@@ -821,7 +821,7 @@
     <span class="p">},</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Mark Ibrahim"</span><span class="p">,</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Mark Ibrahim"</span><span class="p">,</span>
       <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"mark@ibrahim.com"</span><span class="p">,</span>
       <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
@@ -869,7 +869,7 @@
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
+          <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
           <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">35</span>
       <span class="p">}</span>
     <span class="p">},</span>
@@ -880,7 +880,7 @@
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
+          <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
           <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">366</span>
       <span class="p">}</span>
     <span class="p">}</span>

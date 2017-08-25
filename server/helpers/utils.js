@@ -34,6 +34,21 @@ export const isRegisteredUser = (userIdentifier, type = 'id') => {
 };
 
 /**
+ * @description signs and generates a JWT
+ * @function generateToken
+ * @param {int} userId user Id
+ * @param {int} roleId user role id
+ * @returns {string} JWT string
+ */
+export const generateToken = (userId, roleId) => jsonwebtoken.sign(
+  {
+    userId,
+    role: roleId,
+  }, process.env.JWT_SECRET,
+  { expiresIn: 60 * 60 * 24 }
+);
+
+/**
  * @description checks if user supplied password is same as password in database
  * @function verifyPassword
  * @param {string} suppliedPassword user supplied password
@@ -56,12 +71,7 @@ export const verifyPassword = (suppliedPassword, databasePassword) => {
  */
 export const authenticateUser = (userPassword, userObject) => {
   if (verifyPassword(userPassword, userObject.password)) {
-    const token = jsonwebtoken.sign({
-      userId: userObject.userId,
-      role: userObject.roleId,
-    }, process.env.JWT_SECRET,
-    { expiresIn: 60 * 60 * 24 }
-    );
+    const token = generateToken(userObject.userId, userObject.roleId);
     return token;
   }
   return false;
@@ -79,6 +89,11 @@ export const returnValidationErrors = (req, res) => {
 
   if (errors) {
     const errorObject = errors.map(error => error.msg);
+    if (errorObject.length === 1) {
+      return res.status(400).send({
+        errors: errorObject[0],
+      });
+    }
     return res.status(400).send({
       errors: errorObject,
     });
@@ -134,6 +149,51 @@ export const isAuthenticated = (req, res, next) => {
 };
 
 /**
+ * @description handles limit and offset for pagination
+ * @function offsetAndLimitHandler
+ * @param {string} req request object
+ * @returns {object} limit and offset
+ */
+export const offsetAndLimitHandler = (req) => {
+  let offset = 0;
+  let limit = 20;
+  if (req.query.limit) {
+    req.checkQuery('limit', 'Limit must be an integer and greater than 0').isInt({ gt: 0 });
+    limit = parseInt(req.query.limit, 10);
+  }
+  if (req.query.offset) {
+    req.checkQuery('offset', 'Offset must be an integer greater or equal to 0').isInt({ gt: -1 });
+    offset = parseInt(req.query.offset, 10);
+  }
+  return { limit, offset };
+};
+
+/**
+ * @description middleware that checks if resource belongs to owner
+ * @function isUserOwn
+ * @param {string} req request object
+ * @param {object} res response object
+ * @param {callback} next callback for next matching route
+ * @returns {void}
+ */
+export const isUserOwn = (req, res, next) => {
+  isRegisteredUser(req.params.id)
+  .then((validUser) => {
+    if (!validUser) {
+      return res.status(404).send({
+        message: 'user does not exist or has been previously deleted',
+      });
+    }
+    if (req.decoded.userId === parseInt(req.params.id, 10)) {
+      return next();
+    }
+    return res.status(403).send({
+      message: 'Only the owner can access this resource',
+    });
+  });
+};
+
+/**
  * @description middleware that checks if user role is admin
  * @function isAdmin
  * @param {string} req request object
@@ -151,24 +211,6 @@ export const isAdmin = (req, res, next) => {
 };
 
 /**
- * @description middleware that checks if resource belongs to owner
- * @function isUserOwn
- * @param {string} req request object
- * @param {object} res response object
- * @param {callback} next callback for next matching route
- * @returns {void}
- */
-export const isUserOwn = (req, res, next) => {
-  if (req.decoded.userId === parseInt(req.params.id, 10)) {
-    next();
-  } else {
-    res.status(403).send({
-      message: 'Only the owner can access this resource',
-    });
-  }
-};
-
-/**
  * @description middleware that checks if user is an admin or is the owner of resource
  * @function isAdminOrUserOwn
  * @param {string} req request object
@@ -177,13 +219,20 @@ export const isUserOwn = (req, res, next) => {
  * @returns {void}
  */
 export const isAdminOrUserOwn = (req, res, next) => {
-  if (req.decoded.userId === parseInt(req.params.id, 10) || req.decoded.role === 1) {
-    next();
-  } else {
-    res.status(403).send({
+  isRegisteredUser(req.params.id)
+  .then((validUser) => {
+    if (!validUser) {
+      return res.status(404).send({
+        message: 'user does not exist or has been previously deleted',
+      });
+    }
+    if (req.decoded.userId === parseInt(req.params.id, 10) || req.decoded.role === 1) {
+      return next();
+    }
+    return res.status(403).send({
       message: 'Only the owner or an admin can access this resource',
     });
-  }
+  });
 };
 
 /**
@@ -224,3 +273,4 @@ export const pagination = (limit, offset, count) => {
     totalCount: count,
   };
 };
+
