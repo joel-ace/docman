@@ -73,9 +73,7 @@ const loginUser = (req, res) => {
 
   returnValidationErrors(req, res);
 
-  Users.findOne({
-    where: { email: req.body.email },
-  })
+  isRegisteredUser(req.body.email, 'email')
   .then((user) => {
     if (!user) {
       return res.status(401).send({

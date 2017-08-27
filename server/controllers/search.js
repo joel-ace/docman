@@ -34,7 +34,7 @@ const searchUser = (req, res) => {
     attributes: { exclude: ['password', 'updatedAt'] },
   })
   .then((users) => {
-    if (users.length === 0) {
+    if (users.count === 0) {
       return res.status(404).send({
         message: 'no user found for your search query',
       });
@@ -72,7 +72,7 @@ const searchDocument = (req, res) => {
         $iLike: `%${req.query.q}%`,
       }
     },
-    attributes: { exclude: ['content', 'userId'] },
+    attributes: { exclude: ['content'] },
   })
   .then((documents) => {
     if (documents.rows.length === 0) {

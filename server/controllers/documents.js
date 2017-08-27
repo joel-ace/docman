@@ -1,4 +1,4 @@
-import { Documents } from '../models';
+import { Documents, Users } from '../models';
 import {
   catchError,
   returnValidationErrors,
@@ -88,20 +88,27 @@ const getDocumentById = (req, res) => {
 
   Documents.findOne({
     where: { documentId: req.params.id },
+    include: [
+      {
+        model: Users,
+        required: true,
+        attributes: ['userId', 'fullName', 'roleId'],
+      }
+    ],
   })
-  .then((document) => {
+  .then((returnedDocument) => {
+    const document = returnedDocument.get({ plain: true });
     if (!document) {
       return res.status(404).send({
         message: 'This document does not exist or has been previously deleted',
       });
     }
-
     if (isAllowedDocumentAccess(document, req)) {
+      const { User, ...documentObjectWithoutUserDetails } = document;
       return res.status(200).send({
-        document,
+        document: documentObjectWithoutUserDetails,
       });
     }
-
     return res.status(403).send({
       message: 'You are not allowed to view this document',
     });

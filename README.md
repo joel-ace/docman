@@ -20,7 +20,7 @@ The following features make up the DocMan's API:
 - It allows users to be created  
 - It allows users to login and obtain a unique token which is valid for 24hours
 - It allows authenticated users to retrieve and update their information 
-- It allows users to retrieve documents based on userId
+- It allows users to retrieve their documents
 - It allows the admin to manage users
 
 ###### Documents
@@ -34,8 +34,6 @@ The following features make up the DocMan's API:
 ###### Search
 - It allows admin to retrieve all documents that matches search string
 - It allows admin to search users based on a specified search term
-- It allows users to search documents for a specified search term
-- It allows users to search for users using name or email address
 
 ## Technologies Used
 - **[JavaScript ES6](http://es6-features.org/)** - Codes were written in javascript ES6.
