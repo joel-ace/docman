@@ -97,12 +97,12 @@ const getDocumentById = (req, res) => {
     ],
   })
   .then((returnedDocument) => {
-    const document = returnedDocument.get({ plain: true });
-    if (!document) {
+    if (!returnedDocument) {
       return res.status(404).send({
         message: 'This document does not exist or has been previously deleted',
       });
     }
+    const document = returnedDocument.get({ plain: true });
     if (isAllowedDocumentAccess(document, req)) {
       const { User, ...documentObjectWithoutUserDetails } = document;
       return res.status(200).send({
