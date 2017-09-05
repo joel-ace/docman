@@ -1,9 +1,10 @@
-import { Users, Documents } from '../models';
+import { Documents, Users } from '../models';
 import {
   catchError,
   returnValidationErrors,
   isAllowedDocumentAccess,
   pagination,
+  offsetAndLimitHandler,
 } from '../helpers/utils';
 
 
@@ -45,30 +46,13 @@ const createDocument = (req, res) => {
  * @returns {object} response object
  */
 const viewDocument = (req, res) => {
-  let offset = 0;
-  let limit = 20;
-  if (req.query.limit || req.query.offset) {
-    req.checkQuery('limit', 'Limit must be an integer greater than 0').isInt({ gt: 0 });
-    req.checkQuery('offset', 'Offset must be an integer greater or equal to 0').isInt({ gt: -1 });
-
-    returnValidationErrors(req, res);
-
-    /** convert limit and offset to number in base 10 */
-    limit = parseInt(req.query.limit, 10);
-    offset = parseInt(req.query.offset, 10);
-  }
+  const offsetAndLimitObject = offsetAndLimitHandler(req);
+  returnValidationErrors(req, res);
 
   Documents.findAndCount({
-    include: [
-      {
-        model: Users,
-        required: true,
-        attributes: ['userId', 'fullname'],
-      }
-    ],
-    offset,
-    limit,
-    attributes: { exclude: ['content', 'userId'] },
+    offset: offsetAndLimitObject.offset,
+    limit: offsetAndLimitObject.limit,
+    attributes: { exclude: ['content'] },
   })
   .then((documents) => {
     if (documents.rows.length < 1) {
@@ -78,7 +62,11 @@ const viewDocument = (req, res) => {
     }
 
     return res.status(200).send({
-      pagination: pagination(limit, offset, documents.count),
+      pagination: pagination(
+        offsetAndLimitObject.limit,
+        offsetAndLimitObject.offset,
+        documents.count
+      ),
       documents: documents.rows,
     });
   })
@@ -100,29 +88,27 @@ const getDocumentById = (req, res) => {
 
   Documents.findOne({
     where: { documentId: req.params.id },
-    attributes: { exclude: ['userId'] },
     include: [
       {
         model: Users,
         required: true,
-        attributes: ['userId', 'fullname', 'roleId'],
-        plain: true,
+        attributes: ['userId', 'fullName', 'roleId'],
       }
     ],
   })
-  .then((document) => {
-    if (!document) {
+  .then((returnedDocument) => {
+    if (!returnedDocument) {
       return res.status(404).send({
         message: 'This document does not exist or has been previously deleted',
       });
     }
-
+    const document = returnedDocument.get({ plain: true });
     if (isAllowedDocumentAccess(document, req)) {
+      const { User, ...documentObjectWithoutUserDetails } = document;
       return res.status(200).send({
-        document,
+        document: documentObjectWithoutUserDetails,
       });
     }
-
     return res.status(403).send({
       message: 'You are not allowed to view this document',
     });

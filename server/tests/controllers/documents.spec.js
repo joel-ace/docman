@@ -31,7 +31,7 @@ describe('Documents', () => {
     ))
     .then(() => Users.create(
       {
-        fullname: 'Admin Account',
+        fullName: 'Admin Account',
         password: passwordHash('qwerty'),
         email: 'admin@docman.com',
         roleId: 1,
@@ -70,7 +70,7 @@ describe('Documents', () => {
           .send({
             password: 'password',
             email: 'ola@haruna.com',
-            fullname: 'Olalekan Haruna',
+            fullName: 'Olalekan Haruna',
           })
           .end((err, res) => {
             secondUserToken = res.body.accessToken;
@@ -91,7 +91,7 @@ describe('Documents', () => {
     });
   });
   describe('/POST requests', () => {
-    it('should return a status code of 201 if successful', (done) => {
+    it('should return a status code of 201 and document object if successful', (done) => {
       chai.request(app)
         .post('/api/v1/documents')
         .set({ Authorization: adminToken })
@@ -124,7 +124,7 @@ describe('Documents', () => {
         )
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(res.body.errors[0]).to.equal('public, private and role are the only allowed access types');
+          expect(res.body.errors).to.equal('public, private and role are the only allowed access types');
           done();
         });
     });
@@ -144,7 +144,6 @@ describe('Documents', () => {
         .get('/api/v1/documents')
         .set({ Authorization: adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(200);
           expect(Array.isArray(res.body.documents));
           expect(res.body.pagination.pageSize).to.equal(3);
           expect(res.body.documents[0].title).to.equal('Admin document');
@@ -195,7 +194,7 @@ describe('Documents', () => {
     });
   });
   describe('search', () => {
-    it('should return a status code of 200 if search query matches document title', (done) => {
+    it('should return a status code of 200 and array of documents if search query matches document title', (done) => {
       chai.request(app)
         .get('/api/v1/search/documents?q=document')
         .set({ Authorization: adminToken })
@@ -208,12 +207,12 @@ describe('Documents', () => {
           done();
         });
     });
-    it('should receive a status of 200 and message if no user was found', (done) => {
+    it('should receive a status of 404 and message if no user was found', (done) => {
       chai.request(app)
         .get('/api/v1/search/documents?q=unnamedDoc')
         .set({ Authorization: adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(200);
+          expect(res.status).to.equal(404);
           expect(res.body.message).to.equal('No documents found for your search query');
           done();
         });

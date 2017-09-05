@@ -322,7 +322,7 @@
 <li>Start the express server <code>npm start</code>.</li>
 </ol>
 <h2 id='authentication'>Authentication</h2>
-<p>All routes are protected and needs a valid token (there&#39;s an exception in the login and signup). To get a token, the user has to lgin with the email and password used in creating the account. A token is included in the response from the login route, this token expires after 24 hours. With a valid token a user can create/update/delete or search for documents, the request must contain the valid token on the header of the request in the following format.</p>
+<p>All routes are protected and needs a valid token (there&#39;s an exception in the login and signup). To get a token, the user has to login with the email and password used in creating the account. A token is included in the response from the login route, this token expires after 24 hours. With a valid token a user can create/update/delete documents. The request must contain the valid token in the header of the request in the following format.</p>
 
 <p><code>Authorization: token</code></p>
 
@@ -408,6 +408,8 @@
 </tr>
 </tbody></table>
 <h1 id='users'>Users</h1><h2 id='list-users'>List Users</h2>
+<p>List all users. This endpoint is accessible to admin only</p>
+
 <blockquote>
 <p>Sample JSON structured response:</p>
 </blockquote>
@@ -421,12 +423,9 @@
   <span class="s2">"users"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman User"</span><span class="p">,</span>
-      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
-      <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"subscriber"</span>
-      <span class="p">}</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Docman User"</span><span class="p">,</span>
+      <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.259Z"</span>      
     <span class="p">}</span>
   <span class="p">]</span>
 <span class="p">}</span>
@@ -434,6 +433,7 @@
 <ul>
 <li>Endpoint: GET: <code>/api/v1/users</code></li>
 <li>Requires: Authentication</li>
+<li>Admin only</li>
 </ul>
 <h3 id='query-parameters'>Query Parameters</h3>
 <table><thead>
@@ -460,11 +460,13 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='create-user'>Create User</h2>
+<p>Create a new user</p>
+
 <blockquote>
 <p>Request:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+  <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
   <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
   <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"unsafe"</span><span class="p">,</span>
 <span class="p">}</span>
@@ -473,13 +475,14 @@
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
+  <span class="s2">"token"</span><span class="p">:</span> <span class="s2">"eyJhbGciOiTIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsInJvbGUiOjIsImlhdCI6MTUwMzg1MzAwMiwiZXhwIjoxNTAzOTM5NDAyfQ.81J3Rg4N5VbPYzp-MORdua6lTGfsE446MzGY_9ZqXeU"</span><span class="p">,</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
     <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
     <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"created"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span>
-  <span class="p">},</span>
+    <span class="s2">"created"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:56:42.673Z"</span>
+  <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-2'>Request</h3>
 <ul>
@@ -492,26 +495,26 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='get-user'>Get User</h2>
+<p>Get a user using the user id. This endpoint is accessible to admin and account owner only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Emmanuel Johnson"</span><span class="p">,</span>
-    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"emma@johnson.com"</span><span class="p">,</span>
-    <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span><span class="p">,</span>
-    <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T02:12:46.580Z"</span><span class="p">,</span>
-    <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-      <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"subscriber"</span>
-    <span class="p">}</span>
+    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
+    <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:56:42.673Z"</span><span class="p">,</span>
+    <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:56:42.673Z"</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-3'>Request</h3>
 <ul>
 <li>Endpoint: GET: <code>/api/v1/users/:id</code></li>
 <li>Requires: Authentication</li>
+<li>Admin or account owner only</li>
 </ul>
 <h3 id='response-3'>Response</h3>
 <ul>
@@ -519,14 +522,16 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='edit-user'>Edit User</h2>
+<p>Edit/Update user details. This endpoint is accessible to account owner only</p>
+
 <blockquote>
 <p>Request:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
-  <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
+  <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
   <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span><span class="p">,</span>
   <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"@Abit0739Qbr5SafE!"</span><span class="p">,</span>
-  <span class="s2">"oldPassword"</span><span class="p">:</span> <span class="s2">"unsafe"</span><span class="p">,</span>
+  <span class="s2">"oldPassword"</span><span class="p">:</span> <span class="s2">"unsafe"</span>
 <span class="p">}</span>
 </code></pre>
 <blockquote>
@@ -534,9 +539,9 @@
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
   <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
-    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"james@doe.com"</span><span class="p">,</span>
+    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"James Doe"</span><span class="p">,</span>
+    <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@doe.com"</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-4'>Request</h3>
@@ -551,6 +556,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='delete-user'>Delete User</h2>
+<p>Delete a user account. This endpoint is accessible to admin and account owner only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
@@ -568,6 +575,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='login-user'>Login User</h2>
+<p>Logs in a user and issues a token for authentication</p>
+
 <blockquote>
 <p>Request:</p>
 </blockquote>
@@ -592,6 +601,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='list-user-documents'>List User Documents</h2>
+<p>List all documents belonging to a user. This endpoint is accessible to admin and account owner only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
@@ -624,6 +635,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h1 id='documents'>Documents</h1><h2 id='list-documents'>List Documents</h2>
+<p>List all documents. This endpoint is accessible to admin only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
@@ -639,23 +652,17 @@
       <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">143</span><span class="p">,</span>
       <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"List of Albums by Hugh Masekela"</span><span class="p">,</span>
       <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"public"</span><span class="p">,</span>
+      <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Emmanuel Soup"</span>
-      <span class="p">}</span>
     <span class="p">},</span>
     <span class="p">{</span>
       <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">145</span><span class="p">,</span>
       <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"How to Cook Egusi"</span><span class="p">,</span>
       <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"role"</span><span class="p">,</span>
+      <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>
       <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
       <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"James Blunt"</span>
-      <span class="p">}</span>
     <span class="p">}</span>
   <span class="p">]</span>
 <span class="p">}</span>
@@ -688,6 +695,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='create-document'>Create Document</h2>
+<p>Create a new document</p>
+
 <blockquote>
 <p>Request:</p>
 </blockquote>
@@ -708,8 +717,8 @@
     <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"role"</span><span class="p">,</span>
     <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">123</span><span class="p">,</span>
     <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span><span class="p">,</span>
-    <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span>
-  <span class="p">},</span>
+    <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T17:31:15.178Z"</span>
+  <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-2'>Request</h3>
 <ul>
@@ -723,6 +732,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='get-document'>Get Document</h2>
+<p>Get document using the document id. This endpoint is accessible to admin and document owner only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
@@ -732,13 +743,9 @@
     <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Egusi"</span><span class="p">,</span>
     <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"good soup"</span><span class="p">,</span>
     <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"role"</span><span class="p">,</span>
+    <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span>
     <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span><span class="p">,</span>
     <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-10T11:14:53.587Z"</span><span class="p">,</span>
-    <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span>
-        <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Docman Admin"</span><span class="p">,</span>
-        <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span>
-    <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre><h3 id='request-3'>Request</h3>
@@ -751,6 +758,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='edit-document'>Edit Document</h2>
+<p>Update/Edit a document. This endpoint is accessible to document owner only</p>
+
 <blockquote>
 <p>Request:</p>
 </blockquote>
@@ -786,6 +795,8 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='delete-document'>Delete Document</h2>
+<p>Delete a document. This endpoint is accessible to admin and document owner only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
@@ -803,32 +814,32 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h1 id='search'>Search</h1><h2 id='search-users'>Search Users</h2>
+<p>Search for users using their name or email. This endpoint is accessible to admin only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
+  <span class="s2">"pagination"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"page"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"pageCount"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"pageSize"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"totalCount"</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="p">},</span>
   <span class="s2">"users"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Chief Jegede Sokoya"</span><span class="p">,</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Chief Jegede Sokoya"</span><span class="p">,</span>
       <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"jegs@sokoya.com"</span><span class="p">,</span>
       <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
-      <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-          <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"user"</span>
-      <span class="p">}</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.340Z"</span>
     <span class="p">},</span>
     <span class="p">{</span>
       <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
-      <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Mark Ibrahim"</span><span class="p">,</span>
+      <span class="s2">"fullName"</span><span class="p">:</span> <span class="s2">"Mark Ibrahim"</span><span class="p">,</span>
       <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"mark@ibrahim.com"</span><span class="p">,</span>
       <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.170Z"</span><span class="p">,</span>
-      <span class="s2">"Role"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"roleId"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-          <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"user"</span>
-      <span class="p">}</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.417Z"</span>
     <span class="p">}</span>
   <span class="p">]</span>
 <span class="p">}</span>
@@ -857,32 +868,42 @@
 <li>Body <code>(application/json)</code></li>
 </ul>
 <h2 id='search-documents'>Search Documents</h2>
+<p>Search for documents using the title. This endpoint is accessible to admin only</p>
+
 <blockquote>
 <p>Response:</p>
 </blockquote>
 <pre class="highlight javascript tab-javascript"><code><span class="p">{</span>
+  <span class="s2">"pagination"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">"page"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="s2">"pageCount"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="s2">"pageSize"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+      <span class="s2">"totalCount"</span><span class="p">:</span> <span class="mi">3</span>
+  <span class="p">},</span>
   <span class="s2">"documents"</span><span class="p">:</span> <span class="p">[</span>
     <span class="p">{</span>
-      <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+      <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
       <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"My CV"</span><span class="p">,</span>
       <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"private"</span><span class="p">,</span>
-      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
-          <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">35</span>
-      <span class="p">}</span>
+      <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">167</span><span class="p">,</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span><span class="p">,</span>
+      <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span>
     <span class="p">},</span>
     <span class="p">{</span>
-      <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">308</span><span class="p">,</span>
-      <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"My Money"</span><span class="p">,</span>
+      <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">355</span><span class="p">,</span>
+      <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"How to Test with Jest"</span><span class="p">,</span>
       <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"public"</span><span class="p">,</span>
-      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-08T14:29:34.333Z"</span><span class="p">,</span>
-      <span class="s2">"User"</span><span class="p">:</span> <span class="p">{</span>
-          <span class="s2">"fullname"</span><span class="p">:</span> <span class="s2">"Olu Pat"</span><span class="p">,</span>
-          <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">366</span>
-      <span class="p">}</span>
+      <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span><span class="p">,</span>
+      <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">"documentId"</span><span class="p">:</span> <span class="mi">677</span><span class="p">,</span>
+      <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"People like me"</span><span class="p">,</span>
+      <span class="s2">"access"</span><span class="p">:</span> <span class="s2">"role"</span><span class="p">,</span>
+      <span class="s2">"userId"</span><span class="p">:</span> <span class="mi">244</span><span class="p">,</span>
+      <span class="s2">"createdAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span><span class="p">,</span>
+      <span class="s2">"updatedAt"</span><span class="p">:</span> <span class="s2">"2017-08-27T16:15:51.423Z"</span>
     <span class="p">}</span>
   <span class="p">]</span>
 <span class="p">}</span>

@@ -10,20 +10,21 @@ let userToken;
 
 describe('Users', () => {
   describe('creating a new account ', () => {
-    it('should get a status code of 201 if successful', (done) => {
+    it('should get a status code of 201, token and user array if successful', (done) => {
       chai.request(app)
         .post('/api/v1/users')
         .send(
         {
-          fullname: 'Emeka Obi',
+          fullName: 'Emeka Obi',
           password: 'password',
           email: 'emeka@obi.com',
         }
         )
         .end((err, res) => {
           expect(res.status).to.equal(201);
+          expect(res.body).include.keys(['token', 'user']);
           expect(res.body.user.userId).to.equal(3);
-          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.fullName).to.equal('Emeka Obi');
           expect(res.body.user.email).to.equal('emeka@obi.com');
           expect(res.body.user.roleId).to.equal(2);
           done();
@@ -34,7 +35,7 @@ describe('Users', () => {
         .post('/api/v1/users')
         .send({
           userId: 40,
-          fullname: 'Emeka Obi',
+          fullName: 'Emeka Obi',
           password: 'password',
           email: 'emeka@obi.com',
         })
@@ -89,27 +90,27 @@ describe('Users', () => {
     });
   });
   describe('viewing all users', () => {
-    it('should get a status code of 200 if successful', (done) => {
+    it('should get a status code of 200 if user is admin', (done) => {
       chai.request(app)
         .get('/api/v1/users')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
-          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[0].fullName).to.equal('Admin Account');
+          expect(res.body.users[1].fullName).to.equal('Olalekan Haruna');
           done();
         });
     });
-    it('should receive an array of user object', (done) => {
+    it('should receive a status code of 200 and an array of user object', (done) => {
       chai.request(app)
         .get('/api/v1/users')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(Array.isArray(res.body.users));
-          expect(res.body.users[0].fullname).to.equal('Emeka Obi');
-          expect(res.body.users[0].userId).to.equal(3);
-          expect(res.body.users[1].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users[0].fullName).to.equal('Admin Account');
+          expect(res.body.users[0].userId).to.equal(1);
+          expect(res.body.users[1].fullName).to.equal('Olalekan Haruna');
           expect(res.body.users[1].userId).to.equal(2);
           done();
         });
@@ -120,20 +121,20 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.body).to.have.keys(['users', 'pagination']);
-          expect(res.body.users.length).to.equal(1);
-          expect(res.body.users[0].fullname).to.equal('Olalekan Haruna');
+          expect(res.body.users.length).to.equal(2);
+          expect(res.body.users[0].fullName).to.equal('Admin Account');
           done();
         });
     });
   });
   describe('viewing a user using the user id', () => {
-    it('should get a status code of 404 if user does not exist', (done) => {
+    it('should get a status code of 404 and error message if user does not exist', (done) => {
       chai.request(app)
         .get('/api/v1/users/20')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('This user does not exist or has been previously deleted');
+          expect(res.body.message).to.equal('user does not exist or has been previously deleted');
           done();
         });
     });
@@ -143,28 +144,31 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.user.fullname).to.equal('Emeka Obi');
+          expect(res.body.user.fullName).to.equal('Emeka Obi');
           expect(res.body.user.email).to.equal('emeka@obi.com');
           done();
         });
     });
   });
   describe('searching for users using name', () => {
-    it('should get a status code of 200 if user exists', (done) => {
+    it('should get a status code of 200 and an array of user object if search query matches a user', (done) => {
       chai.request(app)
         .get('/api/v1/search/users?q=Emeka')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
+          expect(res.body.users[0].fullName).to.equal('Emeka Obi');
+          expect(res.body.users[0].email).to.equal('emeka@obi.com');
+          expect(res.body.users[0].userId).to.equal(3);
           done();
         });
     });
-    it('should receive a status of 200 and message if no user was found', (done) => {
+    it('should receive a status of 404 and message if no user was found', (done) => {
       chai.request(app)
         .get('/api/v1/search/users?q=Oluwatobi')
         .set({ Authorization: adminToken })
         .end((err, res) => {
-          expect(res.status).to.equal(200);
+          expect(res.status).to.equal(404);
           expect(res.body.message).to.equal('no user found for your search query');
           done();
         });
@@ -199,13 +203,13 @@ describe('Users', () => {
         .send({
           oldPassword: 'password',
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'emeka@obinna.com',
         })
         .set({ Authorization: userToken })
         .end((err, res) => {
           expect(res.status).to.equal(200);
-          expect(res.body.user.fullname).to.equal('Chukwuemeka Obinna');
+          expect(res.body.user.fullName).to.equal('Chukwuemeka Obinna');
           expect(res.body.user.email).to.equal('emeka@obinna.com');
           done();
         });
@@ -215,14 +219,13 @@ describe('Users', () => {
         .put('/api/v1/users/3')
         .send({
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'new@email.com',
         })
         .set({ Authorization: userToken })
         .end((err, res) => {
           expect(res.status).to.equal(400);
-          expect(Array.isArray(res.body.errors));
-          expect(res.body.errors[0]).to.equal(
+          expect(res.body.errors).to.equal(
             'Enter your current password to confirm password change'
           );
           done();
@@ -234,7 +237,7 @@ describe('Users', () => {
         .send({
           oldPassword: 'hbnjkdnfjgfgfd',
           password: 'newPassword',
-          fullname: 'Chukwuemeka Obinna',
+          fullName: 'Chukwuemeka Obinna',
           email: 'new@email.com',
         })
         .set({ Authorization: userToken })
@@ -248,13 +251,13 @@ describe('Users', () => {
     });
   });
   describe('viewing a document', () => {
-    it('should get a status code of 404 if user id does not belong to a valid user', (done) => {
+    it('should get a status code of 404 and an error message if user id does not belong to a valid user', (done) => {
       chai.request(app)
         .get('/api/v1/users/4/documents')
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('This user does not exist or has been previously deleted');
+          expect(res.body.message).to.equal('user does not exist or has been previously deleted');
           done();
         });
     });
@@ -328,7 +331,7 @@ describe('Users', () => {
         .set({ Authorization: adminToken })
         .end((err, res) => {
           expect(res.status).to.equal(404);
-          expect(res.body.message).to.equal('This user does not exist or has been previously deleted');
+          expect(res.body.message).to.equal('user does not exist or has been previously deleted');
           done();
         });
     });

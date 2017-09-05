@@ -1,4 +1,4 @@
-import { Users, Roles, Documents } from '../models';
+import { Users, Documents } from '../models';
 import {
   passwordHash,
   authenticateUser,
@@ -7,6 +7,8 @@ import {
   isRegisteredUser,
   pagination,
   verifyPassword,
+  generateToken,
+  offsetAndLimitHandler,
 } from '../helpers/utils';
 
 /**
@@ -17,7 +19,7 @@ import {
  * @returns {object} response object
  */
 const createUser = (req, res) => {
-  req.checkBody('fullname', 'Full name cannot be empty').notEmpty();
+  req.checkBody('fullName', 'Full name cannot be empty').notEmpty();
   req.checkBody('email', 'Email cannot be empty').notEmpty();
   req.checkBody('email', 'Enter a valid email address').isEmail();
   req.checkBody('password', 'Password cannot be empty').notEmpty();
@@ -34,22 +36,26 @@ const createUser = (req, res) => {
     }
     if (!registeredUser) {
       return Users.create({
-        fullname: req.body.fullname,
+        fullName: req.body.fullName,
         password: passwordHash(req.body.password),
         email: req.body.email,
         roleId: 2,
       });
     }
   })
-  .then(newUser => res.status(201).send({
-    user: {
-      userId: newUser.userId,
-      fullname: newUser.fullname,
-      email: newUser.email,
-      roleId: newUser.roleId,
-      created: newUser.createdAt,
-    },
-  }))
+  .then((newUser) => {
+    const token = generateToken(newUser.userId, newUser.roleId);
+    return res.status(201).send({
+      token,
+      user: {
+        userId: newUser.userId,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        roleId: newUser.roleId,
+        created: newUser.createdAt,
+      }
+    });
+  })
   .catch(() => catchError(res));
 };
 
@@ -67,9 +73,7 @@ const loginUser = (req, res) => {
 
   returnValidationErrors(req, res);
 
-  Users.findOne({
-    where: { email: req.body.email },
-  })
+  isRegisteredUser(req.body.email, 'email')
   .then((user) => {
     if (!user) {
       return res.status(401).send({
@@ -99,35 +103,21 @@ const loginUser = (req, res) => {
  * @returns {object} response object of all users
  */
 const viewUser = (req, res) => {
-  /** set default values for offset and limit */
-  let offset = 0;
-  let limit = 20;
-  if (req.query.limit || req.query.offset) {
-    req.checkQuery('limit', 'Limit must be an integer and greater than 0').isInt({ gt: 0 });
-    req.checkQuery('offset', 'Offset must be an integer greater or equal to 0').isInt({ gt: -1 });
-
-    returnValidationErrors(req, res);
-
-    /** convert limit and offset to number in base 10 */
-    limit = parseInt(req.query.limit, 10);
-    offset = parseInt(req.query.offset, 10);
-  }
+  const offsetAndLimitObject = offsetAndLimitHandler(req);
+  returnValidationErrors(req, res);
 
   Users.findAndCount({
-    include: [
-      {
-        model: Roles,
-        required: true,
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      }
-    ],
-    offset,
-    limit,
-    attributes: { exclude: ['email', 'password', 'updatedAt', 'roleId'] },
+    offset: offsetAndLimitObject.offset,
+    limit: offsetAndLimitObject.limit,
+    attributes: { exclude: ['email', 'password', 'updatedAt'] },
   })
   .then(users => res.status(200).send({
-    pagination: pagination(limit, offset, users.count),
-    users: users.rows.filter(user => user.userId !== 1),
+    pagination: pagination(
+      offsetAndLimitObject.limit,
+      offsetAndLimitObject.offset,
+      users.count
+    ),
+    users: users.rows,
   }))
   .catch(() => catchError(res));
 };
@@ -147,14 +137,7 @@ const getUserById = (req, res) => {
 
   Users.findOne({
     where: { userId: req.params.id },
-    include: [
-      {
-        model: Roles,
-        required: true,
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      }
-    ],
-    attributes: { exclude: ['password', 'roleId'] },
+    attributes: { exclude: ['password'] },
   })
   .then((user) => {
     if (!user) {
@@ -162,7 +145,6 @@ const getUserById = (req, res) => {
         message: 'This user does not exist or has been previously deleted',
       });
     }
-
     return res.status(200).send({
       user,
     });
@@ -180,10 +162,14 @@ const getUserById = (req, res) => {
 const updateUser = (req, res) => {
   req.checkParams('id', 'No user id supplied').notEmpty();
   req.checkParams('id', 'Only integers are allowed as user id').isInt();
-  req.checkBody('email', 'Email cannot be empty').notEmpty();
-  req.checkBody('email', 'Enter a valid email address').isEmail();
-  req.checkBody('password', 'Password cannot be empty').notEmpty();
-  req.checkBody('oldPassword', 'Enter your current password to confirm password change').notEmpty();
+
+  if (req.body.email) {
+    req.checkBody('email', 'Email cannot be empty').notEmpty();
+    req.checkBody('email', 'Enter a valid email address').isEmail();
+  }
+  if (req.body.password) {
+    req.checkBody('oldPassword', 'Enter your current password to confirm password change').notEmpty();
+  }
 
   returnValidationErrors(req, res);
 
@@ -204,7 +190,7 @@ const updateUser = (req, res) => {
 
     return user.update({
       password,
-      fullname: req.body.fullname || user.fullname,
+      fullName: req.body.fullName || user.fullName,
       email: req.body.email || user.email,
       roleId: user.roleId,
     });
@@ -212,7 +198,7 @@ const updateUser = (req, res) => {
   .then(updatedUser => res.status(200).send({
     user: {
       userId: updatedUser.userId,
-      fullname: updatedUser.fullname,
+      fullName: updatedUser.fullName,
       email: updatedUser.email,
     },
   }))
