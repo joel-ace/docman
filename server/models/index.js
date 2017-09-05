@@ -15,7 +15,11 @@ if (config.use_env_variable) {
     { dialect: 'postgres', logging: false }
   );
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password, config
+  );
 }
 
 fs

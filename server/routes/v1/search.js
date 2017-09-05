@@ -7,7 +7,9 @@ import {
 
 const Router = express.Router();
 
-Router.route('/users').get([isAuthenticated, isAdmin], search.searchUser);
-Router.route('/documents').get([isAuthenticated, isAdmin], search.searchDocument);
+Router.route('/users')
+  .get([isAuthenticated, isAdmin], search.searchUser);
+Router.route('/documents')
+  .get([isAuthenticated, isAdmin], search.searchDocument);
 
 export default Router;

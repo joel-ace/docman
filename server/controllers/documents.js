@@ -5,6 +5,7 @@ import {
   isAllowedDocumentAccess,
   pagination,
   offsetAndLimitHandler,
+  handleEmptyQueryResult,
 } from '../helpers/utils';
 
 
@@ -19,8 +20,10 @@ const createDocument = (req, res) => {
   req.checkBody('title', 'title cannot be empty').notEmpty();
   req.checkBody('content', 'content cannot be empty').notEmpty();
   req.checkBody('access', 'access cannot be empty').notEmpty();
-  req.checkBody('access', 'public, private and role are the only allowed access types')
-    .isIn(['public', 'private', 'role']);
+  req.checkBody(
+    'access',
+    'public, private and role are the only allowed access types'
+  ).isIn(['public', 'private', 'role']);
 
   returnValidationErrors(req, res);
 
@@ -55,11 +58,12 @@ const viewDocument = (req, res) => {
     attributes: { exclude: ['content'] },
   })
   .then((documents) => {
-    if (documents.rows.length < 1) {
-      return res.status(404).send({
-        message: 'No document found',
-      });
-    }
+    handleEmptyQueryResult(
+      documents.rows,
+      res,
+      404,
+      'No document found'
+    );
 
     return res.status(200).send({
       pagination: pagination(
@@ -67,7 +71,9 @@ const viewDocument = (req, res) => {
         offsetAndLimitObject.offset,
         documents.count
       ),
-      documents: documents.rows,
+      documents: documents.rows.filter(
+        filteredDocument => filteredDocument.access !== 'private'
+      ),
     });
   })
   .catch(() => catchError(res));
@@ -97,11 +103,13 @@ const getDocumentById = (req, res) => {
     ],
   })
   .then((returnedDocument) => {
-    if (!returnedDocument) {
-      return res.status(404).send({
-        message: 'This document does not exist or has been previously deleted',
-      });
-    }
+    handleEmptyQueryResult(
+      returnedDocument,
+      res,
+      404,
+      'This document does not exist or has been previously deleted'
+    );
+
     const document = returnedDocument.get({ plain: true });
     if (isAllowedDocumentAccess(document, req)) {
       const { User, ...documentObjectWithoutUserDetails } = document;
@@ -129,8 +137,10 @@ const updateDocument = (req, res) => {
   req.checkBody('title', 'title cannot be empty').notEmpty();
   req.checkBody('content', 'content cannot be empty').notEmpty();
   req.checkBody('access', 'access cannot be empty').notEmpty();
-  req.checkBody('access', 'public, private and role are the only allowed access types')
-    .isIn(['public', 'private', 'role']);
+  req.checkBody(
+    'access',
+    'public, private and role are the only allowed access types'
+  ).isIn(['public', 'private', 'role']);
 
   returnValidationErrors(req, res);
 
@@ -138,12 +148,14 @@ const updateDocument = (req, res) => {
     where: { documentId: req.params.id },
   })
   .then((document) => {
-    if (!document) {
-      return res.status(404).send({
-        message: 'This document does not exist or has been previously deleted',
-      });
-    }
-    /** allow updating if the decoded userId is same with the userId on the document */
+    handleEmptyQueryResult(
+      document,
+      res,
+      404,
+      'This document does not exist or has been previously deleted'
+    );
+
+    /** allow updating if decoded userId is same with document userId */
     if (req.decoded.userId === document.userId) {
       return document.update({
         title: req.body.title || document.title,
@@ -178,11 +190,12 @@ const deleteDocument = (req, res) => {
     where: { documentId: req.params.id },
   })
   .then((document) => {
-    if (!document) {
-      return res.status(404).send({
-        message: 'This document does not exist or has been previously deleted',
-      });
-    }
+    handleEmptyQueryResult(
+      document,
+      res,
+      404,
+      'This document does not exist or has been previously deleted'
+    );
 
     /** allow deleting if the user is the document owner or the admin */
     if (req.decoded.userId === document.userId || req.decoded.role === 1) {

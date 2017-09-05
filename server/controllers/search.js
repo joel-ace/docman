@@ -3,7 +3,8 @@ import {
   returnValidationErrors,
   catchError,
   pagination,
-  offsetAndLimitHandler
+  offsetAndLimitHandler,
+  handleEmptyQueryResult
 } from '../helpers/utils';
 
 /**
@@ -34,11 +35,13 @@ const searchUser = (req, res) => {
     attributes: { exclude: ['password', 'updatedAt'] },
   })
   .then((users) => {
-    if (users.count === 0) {
-      return res.status(404).send({
-        message: 'no user found for your search query',
-      });
-    }
+    handleEmptyQueryResult(
+      users.count,
+      res,
+      404,
+      'no user found for your search query'
+    );
+
     return res.status(200).send({
       pagination: pagination(
         offsetAndLimitObject.limit,
@@ -75,11 +78,13 @@ const searchDocument = (req, res) => {
     attributes: { exclude: ['content'] },
   })
   .then((documents) => {
-    if (documents.rows.length === 0) {
-      return res.status(404).send({
-        message: 'No documents found for your search query',
-      });
-    }
+    handleEmptyQueryResult(
+      documents.rows,
+      res,
+      404,
+      'No documents found for your search query'
+    );
+
     return res.status(200).send({
       pagination: pagination(
         offsetAndLimitObject.limit,

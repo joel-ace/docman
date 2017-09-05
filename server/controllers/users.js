@@ -9,6 +9,7 @@ import {
   verifyPassword,
   generateToken,
   offsetAndLimitHandler,
+  handleEmptyQueryResult,
 } from '../helpers/utils';
 
 /**
@@ -75,11 +76,12 @@ const loginUser = (req, res) => {
 
   isRegisteredUser(req.body.email, 'email')
   .then((user) => {
-    if (!user) {
-      return res.status(401).send({
-        message: 'This email is not associated with any account',
-      });
-    }
+    handleEmptyQueryResult(
+      user,
+      res,
+      401,
+      'This email is not associated with any account'
+    );
 
     const token = authenticateUser(req.body.password, user);
 
@@ -140,11 +142,13 @@ const getUserById = (req, res) => {
     attributes: { exclude: ['password'] },
   })
   .then((user) => {
-    if (!user) {
-      return res.status(404).send({
-        message: 'This user does not exist or has been previously deleted',
-      });
-    }
+    handleEmptyQueryResult(
+      user,
+      res,
+      404,
+      'This user does not exist or has been previously deleted'
+    );
+
     return res.status(200).send({
       user,
     });
@@ -168,7 +172,9 @@ const updateUser = (req, res) => {
     req.checkBody('email', 'Enter a valid email address').isEmail();
   }
   if (req.body.password) {
-    req.checkBody('oldPassword', 'Enter your current password to confirm password change').notEmpty();
+    req.checkBody(
+      'oldPassword', 'Enter your current password to confirm password change'
+    ).notEmpty();
   }
 
   returnValidationErrors(req, res);
@@ -180,13 +186,20 @@ const updateUser = (req, res) => {
   .then((user) => {
     user.get({ plain: true });
 
-    if (req.body.password && !verifyPassword(req.body.oldPassword, user.password)) {
+    if (
+      req.body.password
+      && !verifyPassword(req.body.oldPassword, user.password)
+    ) {
       return res.status(403).send({
-        message: 'Password confirmation failed. Enter your current password to confirm password change'
+        message: 'Enter your current password to confirm password change'
       });
     }
 
-    const password = req.body.password ? passwordHash(req.body.password) : user.password;
+    const password = (
+      req.body.password
+      ? passwordHash(req.body.password)
+      : user.password
+    );
 
     return user.update({
       password,
@@ -228,11 +241,12 @@ const deleteUser = (req, res) => {
     where: { userId: req.params.id },
   })
   .then((user) => {
-    if (!user) {
-      return res.status(404).send({
-        message: 'This user does not exist or has been previously deleted',
-      });
-    }
+    handleEmptyQueryResult(
+      user,
+      res,
+      404,
+      'This user does not exist or has been previously deleted'
+    );
 
     return user.destroy();
   })
@@ -258,11 +272,12 @@ const getUserDocuments = (req, res) => {
     where: { userId: req.params.id },
   })
   .then((user) => {
-    if (!user) {
-      return res.status(404).send({
-        message: 'This user does not exist or has been previously deleted',
-      });
-    }
+    handleEmptyQueryResult(
+      user,
+      res,
+      404,
+      'This user does not exist or has been previously deleted'
+    );
 
     return Documents.findAll({
       where: {
@@ -272,11 +287,13 @@ const getUserDocuments = (req, res) => {
     });
   })
   .then((documents) => {
-    if (documents.length === 0) {
-      return res.status(404).send({
-        message: 'No document associated with this user',
-      });
-    }
+    handleEmptyQueryResult(
+      documents,
+      res,
+      404,
+      'No document associated with this user'
+    );
+
     return res.status(200).send({
       documents,
     });

@@ -12,7 +12,9 @@ describe('Undeclared Route', () => {
       .end((err, res) => {
         expect(res.status).to.equal(404);
         expect(res.body).to.have.keys(['message']);
-        expect(res.body.message).to.equal('this resource does not exist or has been previously deleted');
+        expect(res.body.message).to.equal(
+          'this resource does not exist or has been previously deleted'
+        );
         done();
       });
   });
