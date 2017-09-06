@@ -48,7 +48,7 @@ const createDocument = (req, res) => {
  * @param {object} res response object
  * @returns {object} response object
  */
-const viewDocument = (req, res) => {
+const viewDocuments = (req, res) => {
   const offsetAndLimitObject = offsetAndLimitHandler(req);
   returnValidationErrors(req, res);
 
@@ -213,7 +213,7 @@ const deleteDocument = (req, res) => {
 
 export default {
   createDocument,
-  viewDocument,
+  viewDocuments,
   getDocumentById,
   updateDocument,
   deleteDocument,

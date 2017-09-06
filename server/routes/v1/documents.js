@@ -8,7 +8,7 @@ const Router = express.Router();
 
 Router.route('/')
   .post([isAuthenticated], documents.createDocument)
-  .get([isAuthenticated], documents.viewDocument);
+  .get([isAuthenticated], documents.viewDocuments);
 
 Router.route('/:id')
   .get([isAuthenticated], documents.getDocumentById)
