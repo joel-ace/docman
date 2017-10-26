@@ -28,7 +28,7 @@ The following features make up the DocMan's API:
 - It ensures all documents are accessible based on access priviledges 
 - It allows admin users to create, retrieve, and delete documents
 - It ensures users can retrieve, edit and delete documents that they own
-- It allows users to retrieve all public documents
+- It allows users retrieve all public documents
 - It allows users on the same role to retrieve role-based documents
 
 ###### Search
