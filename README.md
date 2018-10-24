@@ -72,4 +72,4 @@ Contributors are welcome to further enhance the features of this API by contribu
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request describing the feature(s) you have added
 
-**N/B:** Ensure your code extends the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript)
+**N/B:** Ensure your code extends the [AirBnB Javascript Styles Guide](https://github.com/airbnb/javascript). This is very important
